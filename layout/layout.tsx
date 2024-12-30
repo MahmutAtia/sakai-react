@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
-import { AuthProvider } from '@/providers/AuthProvider';
+
 import { useRouter } from 'next/navigation';
 import { useEventListener, useMountEffect, useUnmountEffect } from 'primereact/hooks';
 import React, { useContext, useEffect, useRef } from 'react';
@@ -124,7 +124,6 @@ const Layout = ({ children }: ChildContainerProps) => {
 
     return (
         <React.Fragment>
-                            <AuthProvider>
 
             <div className={containerClass}>
                 <AppTopbar ref={topbarRef} />
@@ -138,7 +137,7 @@ const Layout = ({ children }: ChildContainerProps) => {
                 <AppConfig />
                 <div className="layout-mask"></div>
             </div>
-        </AuthProvider>
+
 
         </React.Fragment>
     );

@@ -6,11 +6,18 @@ import { Toast } from 'primereact/toast';
 import { Card } from 'primereact/card';
 import { useRouter } from 'next/navigation';
 
+// get session
+import { useSession } from 'next-auth/react';
+
 const LandingPage = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [processingStatus, setProcessingStatus] = useState('');
     const toast = useRef(null);
     const router = useRouter();
+
+
+    const { data: session, status } = useSession();
+    console.log(session, status);
 
     const handleFileUpload = async (event) => {
         const file = event.files[0];
