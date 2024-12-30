@@ -24,9 +24,14 @@ const PositionTemplatesPage = () => {
         setShowTemplates(true);
     };
 
-    const handleTemplateSelect = (selectedPosition) => {
-     router.push(`/editor/${selectedPosition.id}`);
+    const handleTemplateSelect = (selectedItem, type = 'resume') => {
+        if (type === 'resume') {
+            router.push(`/main/editor/${selectedPosition.id}`);
+        } else {
+            router.push(`/main/editor/${selectedPosition.id}/${selectedItem.id}`);
+        }
     };
+
     // Add these helper functions
     const getDocumentIcon = (type) => {
         const icons = {
@@ -179,7 +184,7 @@ const PositionTemplatesPage = () => {
                                     icon="pi pi-arrow-right"
                                     label="Go to Editor"
                                     className="p-button-rounded p-button-outlined mt-3"
-                                    onClick={() => handleTemplateSelect(selectedPosition)}
+                                    onClick={() => handleTemplateSelect(selectedPosition, 'resume')}
                                 />
                             </div>
                         </Card>
@@ -198,7 +203,7 @@ const PositionTemplatesPage = () => {
                         <div key={doc.id} className="col-12 md:col-6 lg:col-3 p-3">
                             <Card
                                 className="h-full cursor-pointer transform transition-all hover:shadow-8"
-                                onClick={() => handleTemplateSelect(doc)}
+                                onClick={() => handleTemplateSelect(doc, "doc")}
                             >
                                 <div className="flex flex-column gap-3">
                                     {/* Preview Image */}

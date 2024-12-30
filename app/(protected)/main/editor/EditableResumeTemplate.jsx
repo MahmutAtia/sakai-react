@@ -78,7 +78,7 @@ const EditableResumeTemplate = () => {
             <div className="resume-container surface-card p-4 border-round-xl shadow-2 max-w-4xl mx-auto">
                 {SECTION_ORDER.map((sectionKey) => (
                     data[sectionKey] && (
-                        <div key={sectionKey} className="section">
+                        <div key={sectionKey} className="section mb-4">
                             {renderSection(sectionKey)}
                         </div>
                     )

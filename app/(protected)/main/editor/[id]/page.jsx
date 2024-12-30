@@ -27,39 +27,39 @@ const ResumeEditorPage = ({ params }) => {
 
             if (data) {
                 // Data is an array of objects which contains the resume
-                console.log(data);
                 const resume = JSON.parse(data).find((item) => item.id === Number(params.id));
                 setResumeData(resume.resume);
                 setLoading(false);
                 return;
             }
 
-            try {
-                const response = await axios.get(
-                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/resumes/${params.id}`,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...(session?.accessToken && {
-                                'Authorization': `Bearer ${session.accessToken}`
-                            })
-                        }
-                    }
-                );
-                console.log(response);
-                const resume = response.data.resume;
-                setResumeData(resume);
-                console.log(resume);
-            } catch (error) {
-                toast.current?.show({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: error.message,
-                    life: 3000
-                });
-            } finally {
-                setLoading(false);
-            }
+            // get the resume data from the backend ?
+            // try {
+            //     const response = await axios.get(
+            //         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/resumes/${params.id}`,
+            //         {
+            //             headers: {
+            //                 'Content-Type': 'application/json',
+            //                 ...(session?.accessToken && {
+            //                     'Authorization': `Bearer ${session.accessToken}`
+            //                 })
+            //             }
+            //         }
+            //     );
+            //     console.log(response);
+            //     const resume = response.data.resume;
+            //     setResumeData(resume);
+            //     console.log(resume);
+            // } catch (error) {
+            //     toast.current?.show({
+            //         severity: 'error',
+            //         summary: 'Error',
+            //         detail: error.message,
+            //         life: 3000
+            //     });
+            // } finally {
+            //     setLoading(false);
+            // }
         };
 
         fetchResumeData();

@@ -3,14 +3,13 @@ import { useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
-import { useAuth } from '@/hooks/useAuth';
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
         username: '',
         password: ''
     });
-    const { login } = useAuth();
+    // const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();

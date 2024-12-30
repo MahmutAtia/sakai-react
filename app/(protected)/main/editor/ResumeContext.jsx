@@ -109,6 +109,10 @@ export const ResumeProvider = ({ children, initialData }) => {
         editMode,
         setEditMode,
         toggleEditMode,
+        addSectionItem,
+        removeSectionItem,
+        getDefaultItem,
+
       }}
     >
       {children}
