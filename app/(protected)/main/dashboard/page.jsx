@@ -53,6 +53,7 @@ const PositionTemplatesPage = () => {
         return descriptions[type] || '';
     }
 
+    console.log('positions', positions);
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push('/login');
@@ -73,7 +74,7 @@ const PositionTemplatesPage = () => {
                 });
 
                 if (response.status === 401) {
-                    router.push('/auth/login');
+                    router.push('/login');
                     return;
                 }
 
@@ -141,7 +142,7 @@ const PositionTemplatesPage = () => {
                                 onClick={() => handlePositionSelect(position)}
                             >
                                 <div className="flex flex-column align-items-center gap-3 p-3">
-                                    <i className={`${position.primeicon} text-4xl text-primary`}></i>
+                                    <i className={`${position.icon} text-4xl text-primary`}></i>
                                     <h2 className="text-xl font-semibold m-0">{position.title}</h2>
                                     <p className="text-700 text-center m-0">{position.description}</p>
                                 </div>
