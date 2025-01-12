@@ -80,6 +80,7 @@ const ResumeEditorPage = ({ params }) => {
                         icon="pi pi-download"
                         label="Export"
                         className="p-button-outlined"
+                        onClick={() => router.push(`/main/template2/${params.id}`)}
                     />
                     <Button
                         icon="pi pi-save"
