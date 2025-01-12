@@ -3,12 +3,8 @@ import { NextResponse } from 'next/server';
 import mammoth from 'mammoth';
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "../../auth/[...nextauth]/options"
-import * as pdfjsLib from 'pdfjs-dist';
-// Configure PDF.js worker
-if (typeof window === 'undefined') {
-    const pdfjsWorker = require('pdfjs-dist/legacy/build/pdf.worker.entry');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-}
+
+
 
 
 // Configure for larger file uploads
@@ -58,7 +54,7 @@ export async function POST(request: Request) {
                 const uint8Array = new Uint8Array(buffer);
 
                 try {
-                    const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+
                     const pdfDoc = await loadingTask.promise;
                     let text = '';
 
