@@ -6,6 +6,7 @@ import ResumePreview from "./ResumePreview";
 import Template3 from "./template3/template3";
 import ThemeSelector from "./ThemeSelector";
 import TemplateSelector from "./TemplateSelector";
+import Template2 from "./template2/ResumeTemplate2";
 
 // Add PrimeReact imports
 import "primereact/resources/themes/lara-light-indigo/theme.css";
@@ -23,7 +24,7 @@ function App() {
         <TemplateSelector setTemplate={setTemplate} />
         <div className="flex-1 p-4">
           <ThemeSelector />
-          {template === "template1" ? <ResumePreview /> : <Template3 />}
+          {template === "template1" ? <ResumePreview /> : <Template2/>}
         </div>
       </div>
     </ResumeProvider>

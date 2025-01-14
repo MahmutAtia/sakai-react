@@ -7,6 +7,8 @@ import { Calendar } from 'primereact/calendar';
 import { Toast } from 'primereact/toast';
 import { useResume } from '../ResumeContext';
 import AIAssistant from './AIAssistant';
+import SectionWrapper from './SectionWrapper';
+import ItemWrapper from './ItemWrapper';
 
 const Experience = ({ sectionKey }) => {
     const toast = useRef(null);
@@ -71,104 +73,97 @@ const Experience = ({ sectionKey }) => {
             });
         }
     };
-    return (
-        <div className="surface-card p-4 border-round-xl shadow-2">
-            <Toast ref={toast} />
 
-            <div className="flex align-items-center justify-content-between border-bottom-1 surface-border pb-3">
-                <h2 className="text-xl font-semibold m-0">Experience</h2>
-                <Button
-                    icon="pi pi-plus"
-                    className="p-button-rounded p-button-success"
-                    onClick={addExperience}
-                    tooltip="Add Experience"
-                />
-            </div>
 
-            <div className="flex flex-column gap-4 mt-3">
-                {experiences.map((exp, index) => (
-                    <div key={index} className="surface-card p-3 border-1 surface-border border-round">
-                        <div className="flex justify-content-between align-items-center mb-3">
-                            {isItemEditing(index) ? (
-                                <div className="flex gap-2 align-items-center">
-                                    <AIAssistant
-                                        sectionData={exp}
-                                        onUpdate={(updatedData) => handleAIUpdate(index, updatedData)}
-                                    />
-                                    <Button
-                                        icon="pi pi-times"
-                                        className="p-button-rounded p-button-text"
-                                        onClick={() => toggleItemEditMode(index)}
-                                    />
-                                </div>
-                            ) : (
-                                <Button
-                                    icon="pi pi-pencil"
-                                    className="p-button-rounded p-button-text"
-                                    onClick={() => toggleItemEditMode(index)}
-                                />
-                            )}
-                        </div>
+    const handleUndo = (index) => {
+        if (historyRef.current.length > 0) {
+            const prevState = JSON.parse(historyRef.current.pop());
+            const newData = { ...data };
+            newData[sectionKey][index] = prevState;
+            setData(newData);
 
-                        {isItemEditing(index) ? (
-                            <div className="flex flex-column gap-3">
-                                <InputText
-                                    placeholder="Company"
-                                    value={exp.company}
-                                    onChange={(e) => handleInputChange(index, 'company', e.target.value)}
-                                    className="w-full"
-                                />
-                                <InputText
-                                    placeholder="Position"
-                                    value={exp.position}
-                                    onChange={(e) => handleInputChange(index, 'position', e.target.value)}
-                                    className="w-full"
-                                />
-                                <div className="flex gap-2">
-                                    <Calendar
-                                        placeholder="Start Date"
-                                        value={exp.startDate}
-                                        onChange={(e) => handleInputChange(index, 'startDate', e.value)}
-                                        className="flex-1"
-                                        monthNavigator
-                                        yearNavigator
-                                        yearRange="2000:2030"
-                                    />
-                                    <Calendar
-                                        placeholder="End Date"
-                                        value={exp.endDate}
-                                        onChange={(e) => handleInputChange(index, 'endDate', e.value)}
-                                        className="flex-1"
-                                        monthNavigator
-                                        yearNavigator
-                                        yearRange="2000:2030"
-                                    />
-                                </div>
-                                <InputTextarea
-                                    placeholder="Description"
-                                    value={exp.description}
-                                    onChange={(e) => handleInputChange(index, 'description', e.target.value)}
-                                    rows={3}
-                                    className="w-full"
-                                />
-                            </div>
-                        ) : (
-                            <div className="flex flex-column gap-2">
-                                <div className="flex justify-content-between">
-                                    <span className="font-semibold">{exp.company}</span>
-                                    <span className="text-500">
-                                        {exp.startDate} - {exp.endDate}
-                                    </span>
-                                </div>
-                                <span className="text-primary">{exp.position}</span>
-                                <p className="text-700 line-height-3">{exp.description}</p>
-                            </div>
-                        )}
+            toast.current.show({
+                severity: 'info',
+                summary: 'Undo',
+                detail: 'Previous state restored'
+            });
+        }
+    };
+
+
+    return (<SectionWrapper title="Experience" onAdd={addExperience} toast={toast}>
+        {experiences.map((exp, index) => (
+            <ItemWrapper
+                key={index}
+                isEditing={isItemEditing(index)}
+                onEdit={() => toggleEditMode(sectionKey, index)}
+                onUndo={() => handleUndo(index)}
+                canUndo={historyRef.current.length > 0}
+                onAIUpdate={(updatedData) => handleAIUpdate(index, updatedData)}
+                sectionData={exp}
+                editContent={
+                    <div className="flex flex-column gap-3">
+                    <InputText
+                        placeholder="Company"
+                        value={exp.company}
+                        onChange={(e) => handleInputChange(index, 'company', e.target.value)}
+                        className="w-full"
+                    />
+                    <InputText
+                        placeholder="Position"
+                        value={exp.position}
+                        onChange={(e) => handleInputChange(index, 'position', e.target.value)}
+                        className="w-full"
+                    />
+                    <div className="flex gap-2">
+                        <Calendar
+                            placeholder="Start Date"
+                            value={exp.startDate}
+                            onChange={(e) => handleInputChange(index, 'startDate', e.value)}
+                            className="flex-1"
+                            monthNavigator
+                            yearNavigator
+                            yearRange="2000:2030"
+                        />
+                        <Calendar
+                            placeholder="End Date"
+                            value={exp.endDate}
+                            onChange={(e) => handleInputChange(index, 'endDate', e.value)}
+                            className="flex-1"
+                            monthNavigator
+                            yearNavigator
+                            yearRange="2000:2030"
+                        />
                     </div>
-                ))}
-            </div>
-        </div>
-    );
+                    <InputTextarea
+                        placeholder="Description"
+                        value={exp.description}
+                        onChange={(e) => handleInputChange(index, 'description', e.target.value)}
+                        rows={3}
+                        className="w-full"
+                    />
+                </div>
+                }
+                viewContent={
+                    <div className="flex flex-column gap-2">
+                    <div className="flex justify-content-between">
+                        <span className="font-semibold">{exp.company}</span>
+                        <span className="text-500">
+                            {exp.startDate ? new Date(exp.startDate).toLocaleDateString() : ''} -
+                            {exp.endDate ? new Date(exp.endDate).toLocaleDateString() : ''}
+                        </span>
+                    </div>
+                    <span className="text-primary">{exp.position}</span>
+                    <div style={{ whiteSpace: 'pre-line' }} className="text-700 line-height-4">{exp.description}</div>
+                </div>
+                }
+            />
+        ))}
+    </SectionWrapper>
+);
+
+
 };
+
 
 export default Experience;
