@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import { Tooltip } from 'primereact/tooltip';
 import './styles.css';
 
 const AIAssistant = ({ sectionData, onUpdate }) => {
@@ -27,33 +28,47 @@ const AIAssistant = ({ sectionData, onUpdate }) => {
     setIsProcessing(false);
   };
 
-  return (
+return (
     <div className="flex align-items-center gap-2">
-      {showInput && (
-        <div className="flex gap-2 animate__animated animate__fadeIn">
-          <InputText
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Ask AI..."
-            className="p-inputtext-sm surface-200 border-round-2xl transition-all transition-duration-300 hover:surface-100"
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          />
-        </div>
-      )}
-      <Button
-        icon={
-          isProcessing
-            ? "pi pi-spin pi-spinner"
-            : showInput
-              ? "pi pi-arrow-right"
-              : "pi pi-reddit"
-        }
-        className={`p-button-rounded p-button-text ${isProcessing ? 'p-button-info' : 'p-button-help'} transition-colors transition-duration-300 hover:shadow-4`}
-        onClick={() => !isProcessing && setShowInput(!showInput)}
-        disabled={isProcessing}
-      />
+        {showInput && (
+            <div className="flex gap-2 animate__animated animate__fadeIn">
+                <span className="p-input-icon-right w-full"
+                      data-pr-tooltip="Click to ask AI Assistant for edits. Press Enter to submit"
+                      data-pr-position="top">
+                <InputText
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="Ask AI..."
+                    className="p-inputtext-lg surface-300 border-round-2xl transition-all transition-duration-300 hover:surface-100 text-overlay"
+                    onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                    style={{ width: '300px' }} // Adjust the width as needed
+                />
+                </span>
+                <Tooltip target="[data-pr-tooltip]"
+                    position="top"
+                    mouseTrack={false}
+                    mouseTrackTop={15}
+                    style={{ marginTop: '-20px' }}
+
+                />
+
+            </div>
+        )}
+        <Button
+            icon={
+                isProcessing
+                    ? "pi pi-spin pi-spinner"
+                    : showInput
+                        ? "pi pi-arrow-right"
+                        : "pi pi-user-edit"
+            }
+            className={`p-button-rounded p-button-text ${isProcessing ? 'p-button-info' : 'p-button-help'} transition-colors transition-duration-300 hover:shadow-4`}
+            onClick={() => !isProcessing && setShowInput(!showInput)}
+            disabled={isProcessing}
+            style={{ fontSize: '1.5rem' }} // Adjust the icon size as needed
+        />
     </div>
-  );
+);
 }
 
 export default AIAssistant;
