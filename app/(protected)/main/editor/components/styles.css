@@ -107,3 +107,32 @@
   .animate-border {
     animation: glowingBorder 2s ease-out forwards;
   }
+
+
+  /* sidebar and editableResume */
+
+  .p-sidebar {
+    background: var(--surface-0);
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.p-sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--surface-200);
+}
+
+.bg-gray-50 {
+    background: #F8FAFC;
+}
+
+.p-button.p-button-outlined:not(.p-button-plain) {
+    background: var(--surface-0);
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    transition: all 0.2s;
+}
+
+.p-button.p-button-outlined:not(.p-button-plain):hover {
+    background: var(--primary-color);
+    color: var(--surface-0);
+}
