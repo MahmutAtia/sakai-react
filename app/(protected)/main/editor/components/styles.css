@@ -33,6 +33,8 @@
 }
 
 
+
+
 .upload-custom .p-fileupload-content {
     border: 2px dashed var(--surface-border);
     border-radius: 1rem;
@@ -62,3 +64,46 @@
     z-index: -1;
     border-radius: inherit;
 }
+
+
+@keyframes flowRight {
+    0% {
+      width: 0;
+      opacity: 0;
+    }
+    50% {
+      width: 3rem;
+      opacity: 1;
+    }
+    100% {
+      width: 0;
+      opacity: 0;
+    }
+  }
+
+
+
+/* last item styling */
+
+  @keyframes glowingBorder {
+    0% {
+      border-color: #4338ca;
+      box-shadow: 0 0 5px #4338ca;
+    }
+    33% {
+      border-color: #3b82f6;
+      box-shadow: 0 0 10px #3b82f6;
+    }
+    66% {
+      border-color: #06b6d4;
+      box-shadow: 0 0 10px #06b6d4;
+    }
+    100% {
+      border-color: transparent;
+      box-shadow: none;
+    }
+  }
+
+  .animate-border {
+    animation: glowingBorder 2s ease-out forwards;
+  }

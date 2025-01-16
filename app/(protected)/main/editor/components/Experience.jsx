@@ -1,20 +1,23 @@
 "use client";
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
-import { Toast } from 'primereact/toast';
 import { useResume } from '../ResumeContext';
-import AIAssistant from './AIAssistant';
 import SectionWrapper from './SectionWrapper';
 import ItemWrapper from './ItemWrapper';
+import ArrowIndicator from './ArrowIndicator';
+import './styles.css';
 
 const Experience = ({ sectionKey }) => {
     const toast = useRef(null);
-    const { data, setData, toggleEditMode, editMode } = useResume();
+    const { data, setData, toggleEditMode, editMode, removeSectionItem } = useResume();
     const experiences = data[sectionKey] || [];
     const historyRef = useRef([]);
+    const firstItemRef = useRef(null);
+    const lastItemRef = useRef(null);
+    const [showArrow, setShowArrow] = useState(false);
+
 
     const isItemEditing = (index) => editMode[sectionKey]?.[index];
 
@@ -41,8 +44,18 @@ const Experience = ({ sectionKey }) => {
         setData(newData);
         // Automatically enable editing for new item
         toggleItemEditMode(experiences.length);
-    };
 
+
+        // Show arrow and scroll
+        setShowArrow(true);
+        setTimeout(() => {
+            lastItemRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+            setTimeout(() => setShowArrow(false), 1000);
+        }, 100);
+    };
     const handleAIUpdate = async (index, updatedData) => {
         try {
             // Save current state to history
@@ -91,76 +104,114 @@ const Experience = ({ sectionKey }) => {
     };
 
 
-    return (<SectionWrapper title="Experience" onAdd={addExperience} toast={toast}>
+    const handleDelete = (index) => {
+        removeSectionItem(sectionKey, index);
+
+        setTimeout(() => {
+            if (firstItemRef.current) {
+                firstItemRef.current.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }, 100);
+
+        toast.current.show({
+            severity: 'success',
+            summary: 'Deleted',
+            detail: 'Item has been removed'
+        });
+    };
+
+    return (<SectionWrapper
+        title="Experience" onAdd={addExperience} toast={toast}
+        className="scroll-mt-[100px]"
+    >
         {experiences.map((exp, index) => (
-            <ItemWrapper
+            <div
                 key={index}
-                isEditing={isItemEditing(index)}
-                onEdit={() => toggleEditMode(sectionKey, index)}
-                onUndo={() => handleUndo(index)}
-                canUndo={historyRef.current.length > 0}
-                onAIUpdate={(updatedData) => handleAIUpdate(index, updatedData)}
-                sectionData={exp}
-                editContent={
-                    <div className="flex flex-column gap-3">
-                    <InputText
-                        placeholder="Company"
-                        value={exp.company}
-                        onChange={(e) => handleInputChange(index, 'company', e.target.value)}
-                        className="w-full"
-                    />
-                    <InputText
-                        placeholder="Position"
-                        value={exp.position}
-                        onChange={(e) => handleInputChange(index, 'position', e.target.value)}
-                        className="w-full"
-                    />
-                    <div className="flex gap-2">
-                        <Calendar
-                            placeholder="Start Date"
-                            value={exp.startDate}
-                            onChange={(e) => handleInputChange(index, 'startDate', e.value)}
-                            className="flex-1"
-                            monthNavigator
-                            yearNavigator
-                            yearRange="2000:2030"
-                        />
-                        <Calendar
-                            placeholder="End Date"
-                            value={exp.endDate}
-                            onChange={(e) => handleInputChange(index, 'endDate', e.value)}
-                            className="flex-1"
-                            monthNavigator
-                            yearNavigator
-                            yearRange="2000:2030"
-                        />
-                    </div>
-                    <InputTextarea
-                        placeholder="Description"
-                        value={exp.description}
-                        onChange={(e) => handleInputChange(index, 'description', e.target.value)}
-                        rows={3}
-                        className="w-full"
-                    />
-                </div>
+                ref={index === 0
+                    ? firstItemRef
+                    : index === experiences.length - 1
+                        ? lastItemRef
+                        : null
                 }
-                viewContent={
-                    <div className="flex flex-column gap-2">
-                    <div className="flex justify-content-between">
-                        <span className="font-semibold">{exp.company}</span>
-                        <span className="text-500">
-                            {exp.startDate ? new Date(exp.startDate).toLocaleDateString() : ''} -
-                            {exp.endDate ? new Date(exp.endDate).toLocaleDateString() : ''}
-                        </span>
-                    </div>
-                    <span className="text-primary">{exp.position}</span>
-                    <div style={{ whiteSpace: 'pre-line' }} className="text-700 line-height-4">{exp.description}</div>
-                </div>
-                }
-            />
+                className={`
+                        relative transition-all duration-500 scroll-mt-[100px]
+              ${index === experiences.length - 1 ? 'animate-fadeIn animate-border' : ''}
+          `}
+            >
+
+                <ItemWrapper
+                    key={index}
+                    isEditing={isItemEditing(index)}
+                    onEdit={() => toggleEditMode(sectionKey, index)}
+                    onUndo={() => handleUndo(index)}
+                    onDelete={() => handleDelete(index)}
+                    canUndo={historyRef.current.length > 0}
+                    onAIUpdate={(updatedData) => handleAIUpdate(index, updatedData)}
+                    sectionData={exp}
+                    editContent={
+                        <div className="flex flex-column gap-3">
+                            <InputText
+                                placeholder="Company"
+                                value={exp.company}
+                                onChange={(e) => handleInputChange(index, 'company', e.target.value)}
+                                className="w-full"
+                            />
+                            <InputText
+                                placeholder="Position"
+                                value={exp.position}
+                                onChange={(e) => handleInputChange(index, 'position', e.target.value)}
+                                className="w-full"
+                            />
+                            <div className="flex gap-2">
+                                <Calendar
+                                    placeholder="Start Date"
+                                    value={exp.startDate}
+                                    onChange={(e) => handleInputChange(index, 'startDate', e.value)}
+                                    className="flex-1"
+                                    monthNavigator
+                                    yearNavigator
+                                    yearRange="2000:2030"
+                                />
+                                <Calendar
+                                    placeholder="End Date"
+                                    value={exp.endDate}
+                                    onChange={(e) => handleInputChange(index, 'endDate', e.value)}
+                                    className="flex-1"
+                                    monthNavigator
+                                    yearNavigator
+                                    yearRange="2000:2030"
+                                />
+                            </div>
+                            <InputTextarea
+                                placeholder="Description"
+                                value={exp.description}
+                                onChange={(e) => handleInputChange(index, 'description', e.target.value)}
+                                rows={3}
+                                className="w-full"
+                            />
+                        </div>
+                    }
+                    viewContent={
+                        <div className="flex flex-column gap-2">
+                            <div className="flex justify-content-between">
+                                <span className="font-semibold">{exp.company}</span>
+                                <span className="text-500">
+                                    {exp.startDate ? new Date(exp.startDate).toLocaleDateString() : ''} -
+                                    {exp.endDate ? new Date(exp.endDate).toLocaleDateString() : ''}
+                                </span>
+                            </div>
+                            <span className="text-primary">{exp.position}</span>
+                            <div style={{ whiteSpace: 'pre-line' }} className="text-700 line-height-4">{exp.description}</div>
+                        </div>
+                    }
+                />
+            </div>
         ))}
     </SectionWrapper>
-);
+    );
 
 
 };
