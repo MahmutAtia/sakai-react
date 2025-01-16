@@ -16,7 +16,8 @@ const Experience = ({ sectionKey }) => {
     const historyRef = useRef([]);
     const firstItemRef = useRef(null);
     const lastItemRef = useRef(null);
-    const [showArrow, setShowArrow] = useState(false);
+    const [newItemIndex, setNewItemIndex] = useState(null);
+
 
 
     const isItemEditing = (index) => editMode[sectionKey]?.[index];
@@ -32,6 +33,7 @@ const Experience = ({ sectionKey }) => {
     };
 
     const addExperience = () => {
+        const newIndex = experiences.length;
         const newExperience = {
             company: '',
             position: '',
@@ -43,11 +45,11 @@ const Experience = ({ sectionKey }) => {
         newData[sectionKey] = [...experiences, newExperience];
         setData(newData);
         // Automatically enable editing for new item
-        toggleItemEditMode(experiences.length);
+        setNewItemIndex(newIndex); // Set index to trigger animation
+        toggleItemEditMode(experiences.length); // Enable editing
 
 
-        // Show arrow and scroll
-        setShowArrow(true);
+        //  scroll
         setTimeout(() => {
             lastItemRef.current?.scrollIntoView({
                 behavior: 'smooth',
@@ -105,6 +107,11 @@ const Experience = ({ sectionKey }) => {
 
 
     const handleDelete = (index) => {
+         // Close edit mode if open
+         if (isItemEditing(index)) {
+            toggleItemEditMode(index);
+        }
+        // Remove item from data
         removeSectionItem(sectionKey, index);
 
         setTimeout(() => {
@@ -128,22 +135,17 @@ const Experience = ({ sectionKey }) => {
         className="scroll-mt-[100px]"
     >
         {experiences.map((exp, index) => (
-            <div
-                key={index}
-                ref={index === 0
-                    ? firstItemRef
-                    : index === experiences.length - 1
-                        ? lastItemRef
-                        : null
-                }
-                className={`
-                        relative transition-all duration-500 scroll-mt-[100px]
-              ${index === experiences.length - 1 ? 'animate-fadeIn animate-border' : ''}
-          `}
-            >
+
 
                 <ItemWrapper
                     key={index}
+                    itemRef={index === 0
+                        ? firstItemRef
+                        : index === experiences.length - 1
+                            ? lastItemRef
+                            : null
+                    }
+                    isNewItem={index === newItemIndex}
                     isEditing={isItemEditing(index)}
                     onEdit={() => toggleEditMode(sectionKey, index)}
                     onUndo={() => handleUndo(index)}
@@ -208,7 +210,6 @@ const Experience = ({ sectionKey }) => {
                         </div>
                     }
                 />
-            </div>
         ))}
     </SectionWrapper>
     );
