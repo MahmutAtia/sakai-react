@@ -72,3 +72,45 @@
         width: calc(100% - 20rem); /* Ensure main content takes up remaining space */
     }
 }
+.draggableSection {
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: grab;
+    transform-origin: center center;
+    will-change: transform;
+    touch-action: none;
+}
+
+.draggableSection:active {
+    cursor: grabbing;
+}
+
+.draggingItem {
+    opacity: 0.9;
+    background: var(--surface-hover);
+    box-shadow: var(--shadow-4) !important;
+    /* Remove transform reset to maintain proper cursor position */
+    position: fixed; /* Use fixed positioning during drag */
+    cursor: grabbing;
+    z-index: 1000;
+}
+
+.dragHandle {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    position: relative;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    margin: 0 ;
+
+}
+
+.dragHandle:active {
+    cursor: grabbing;
+}

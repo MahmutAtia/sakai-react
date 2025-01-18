@@ -2,21 +2,46 @@ import React, { createContext, useState, useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
 import "primeicons/primeicons.css";
 
-
 export const ResumeContext = createContext();
 
 export const ResumeProvider = ({ children, initialData }) => {
   const [data, setData] = useState(initialData);
   const [editMode, setEditMode] = useState({});
+
+  // List of all default sections
+  const defaultSections = [
+    "personal_information",
+    "summary",
+    "experience",
+    "education",
+    "projects",
+    "skills",
+    "languages",
+    "awards_and_recognition",
+    "volunteer_and_social_activities",
+    "certifications",
+    "interests",
+    "references",
+    "publications",
+    "courses",
+    "conferences",
+    "speaking_engagements",
+    "patents",
+    "professional_memberships",
+    "military_service",
+    "teaching_experience",
+    "research_experience",
+  ];
+
   const toggleEditMode = (section, id = "all") => {
-  setEditMode((prevEditMode) => ({
-    ...prevEditMode,
-    [section]: {
-      ...(prevEditMode[section] ? prevEditMode[section] : {}), // Check if exists
-      [id]: !prevEditMode[section]?.[id],
-    },
-  }));
-};
+    setEditMode((prevEditMode) => ({
+      ...prevEditMode,
+      [section]: {
+        ...(prevEditMode[section] ? prevEditMode[section] : {}), // Check if exists
+        [id]: !prevEditMode[section]?.[id],
+      },
+    }));
+  };
 
   const addSectionItem = (section) => {
     setData((prevData) => {
@@ -254,6 +279,7 @@ export const ResumeProvider = ({ children, initialData }) => {
         return {};
     }
   };
+
   return (
     <ResumeContext.Provider
       value={{
@@ -265,7 +291,7 @@ export const ResumeProvider = ({ children, initialData }) => {
         addSectionItem,
         removeSectionItem,
         getDefaultItem,
-
+        defaultSections, // Provide default sections to the context
       }}
     >
       {children}

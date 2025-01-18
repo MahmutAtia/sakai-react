@@ -19,7 +19,7 @@ const EditableResumeTemplate = () => {
     const { data, setData } = useResume();
     const [loading, setLoading] = useState(false);
     const [hiddenSections, setHiddenSections] = useState([]);
-    const [sidebarVisible, setSidebarVisible] = useState(false); // State for sidebar visibility
+    const [sidebarVisible, setSidebarVisible] = useState(false);
     const NON_ARRAY_SECTIONS = ['personal_information', 'summary', 'objective'];
     const [sectionOrder, setSectionOrder] = useState([
         'personal_information',
@@ -51,26 +51,15 @@ const EditableResumeTemplate = () => {
         );
     };
 
-    const handleReorderSections = async (sourceIndex, destinationIndex) => {
-        setLoading(true);
-        try {
-            const activeSectionKeys = sectionOrder.filter(key => !hiddenSections.includes(key));
-            const [movedSection] = activeSectionKeys.splice(sourceIndex, 1);
-            activeSectionKeys.splice(destinationIndex, 0, movedSection);
+    const handleReorderSections = (result) => {
+        if (!result.destination) return;
 
-            const newOrder = sectionOrder.filter(key => !activeSectionKeys.includes(key));
-            activeSectionKeys.forEach((key, index) => {
-                const originalIndex = sectionOrder.indexOf(key);
-                if (originalIndex !== -1) {
-                    newOrder.splice(index, 0, key);
-                }
-            });
+        const newOrder = Array.from(sectionOrder);
+        const [removed] = newOrder.splice(result.source.index, 1);
+        newOrder.splice(result.destination.index, 0, removed);
 
-            setSectionOrder(newOrder);
-            localStorage.setItem('sectionOrder', JSON.stringify(newOrder));
-        } finally {
-            setLoading(false);
-        }
+        setSectionOrder(newOrder);
+        localStorage.setItem('sectionOrder', JSON.stringify(newOrder));
     };
 
     const renderSection = (sectionKey) => {
@@ -136,12 +125,7 @@ const EditableResumeTemplate = () => {
                                 </div>
                             }
                         >
-                            <DragDropContext
-                                onDragEnd={(result) => {
-                                    if (!result.destination) return;
-                                    handleReorderSections(result.source.index, result.destination.index);
-                                }}
-                            >
+                            <DragDropContext onDragEnd={handleReorderSections}>
                                 <Droppable droppableId="sections">
                                     {(provided) => (
                                         <div
@@ -149,7 +133,9 @@ const EditableResumeTemplate = () => {
                                             ref={provided.innerRef}
                                             className="flex flex-column gap-2 mt-2"
                                         >
-                                            {sectionOrder.map((sectionKey, index) => {
+                                            {sectionOrder && sectionOrder.map((sectionKey, index) => {
+                                                if (!sectionKey) return null; // Guard clause for undefined keys
+
                                                 const isEmpty = isSectionEmpty(sectionKey);
                                                 return (
                                                     <Draggable
