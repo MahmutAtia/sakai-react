@@ -70,7 +70,7 @@ const ResumeEditorPage = ({ params }) => {
     if (!resumeData) return <div className="flex justify-content-center align-items-center h-screen">No resume found</div>;
 
     return (
-        <div className="h-screen overflow-hidden">
+        <div className="h-screen overflow-hidden surface-ground">
             <div className="flex flex-column h-full">
                 {/* Header */}
                 <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg">
@@ -91,7 +91,7 @@ const ResumeEditorPage = ({ params }) => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 relative m-4">
+                <div className="flex-1 relative">
                     {resumeData && (
                         <ResumeProvider initialData={resumeData}>
                             <EditableResumeTemplate />

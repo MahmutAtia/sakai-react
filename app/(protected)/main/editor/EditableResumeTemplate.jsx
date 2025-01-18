@@ -13,12 +13,13 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import 'primeflex/primeflex.css';
-import './s.css';
+import styles from './EditableResumeTemplate.module.css';
 
 const EditableResumeTemplate = () => {
     const { data, setData } = useResume();
     const [loading, setLoading] = useState(false);
     const [hiddenSections, setHiddenSections] = useState([]);
+    const [sidebarVisible, setSidebarVisible] = useState(false); // State for sidebar visibility
     const NON_ARRAY_SECTIONS = ['personal_information', 'summary', 'objective'];
     const [sectionOrder, setSectionOrder] = useState([
         'personal_information',
@@ -109,9 +110,18 @@ const EditableResumeTemplate = () => {
     }, []);
 
     return (
-        <div className="grid grid-nogutter h-screen surface-ground overflow-hidden">
-            {/* Left Sidebar */}
-            <div className="col-fixed w-20rem h-screen surface-section border-right-1 surface-border">
+        <div className="surface-ground h-full">
+            {/* Sidebar Toggle Button for Small Screens */}
+            <div className="lg:hidden p-3 flex justify-content-start align-items-center surface-ground">
+                <Button
+                    icon="pi pi-bars"
+                    className="p-button-text"
+                    onClick={() => setSidebarVisible(!sidebarVisible)}
+                />
+            </div>
+
+            {/* Sidebar */}
+            <div className={`${styles.sidebar} ${sidebarVisible ? styles.sidebarVisible : ''}`}>
                 <div className="p-4 border-bottom-1 surface-border backdrop-blur-sm bg-white-alpha-90">
                     <h2 className="text-xl font-semibold text-900 m-0">Resume Builder</h2>
                     <p className="text-600 text-sm mt-2 mb-0">Drag sections to reorder</p>
@@ -191,32 +201,38 @@ const EditableResumeTemplate = () => {
                 </div>
             </div>
 
+            {/* Overlay for Sidebar on Small Screens */}
+            {sidebarVisible && (
+                <div
+                    className={`${styles.overlay} lg:hidden`}
+                    onClick={() => setSidebarVisible(false)}
+                />
+            )}
+
             {/* Main Content Area */}
-            <div className="col h-screen">
-                <div className="h-full overflow-y-auto scrollable-content">
-                    <div className="p-4 flex justify-content-center">
-                        {loading && (
-                            <div className="fixed top-50 left-50 -translate-x-50 -translate-y-50 z-5">
-                                <ProgressSpinner strokeWidth="3" />
-                            </div>
-                        )}
-                        <div className="surface-card p-6 border-round-xl shadow-2 w-full max-w-7xl">
-                            {sectionOrder.map((sectionKey) => {
-                                const isEmpty = isSectionEmpty(sectionKey);
-                                return (
-                                    !hiddenSections.includes(sectionKey) && (
-                                        <div key={sectionKey} ref={sectionRefs.current[sectionKey]}>
-                                            {renderSection(sectionKey)}
-                                            {isEmpty && (
-                                                <div className="text-center text-500 mt-2">
-                                                    This section is empty. Add content to make it visible.
-                                                </div>
-                                            )}
-                                        </div>
-                                    )
-                                );
-                            })}
+            <div className={`${styles.mainContent}`}>
+                <div className="h-full flex justify-content-center p-2 lg:p-4">
+                    {loading && (
+                        <div className="fixed top-50 left-50 -translate-x-50 -translate-y-50 z-5">
+                            <ProgressSpinner strokeWidth="3" />
                         </div>
+                    )}
+                    <div className={`${styles.surfaceCard} ${styles.scrollableContent} w-full`}>
+                        {sectionOrder.map((sectionKey) => {
+                            const isEmpty = isSectionEmpty(sectionKey);
+                            return (
+                                !hiddenSections.includes(sectionKey) && (
+                                    <div key={sectionKey} ref={sectionRefs.current[sectionKey]} className={styles.sectionSpacing}>
+                                        {renderSection(sectionKey)}
+                                        {isEmpty && (
+                                            <div className="text-center text-500 mt-2">
+                                                This section is empty. Add content to make it visible.
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            );
+                        })}
                     </div>
                 </div>
             </div>

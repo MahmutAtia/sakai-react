@@ -56,7 +56,7 @@ export const ResumeProvider = ({ children, initialData }) => {
         return {
           name: "",
           email: "",
-          phone: [""],
+          phone: [],
           location: {
             address: null,
             city: null,
@@ -64,10 +64,10 @@ export const ResumeProvider = ({ children, initialData }) => {
             postal_code: null,
           },
           profiles: {
-            linkedin: "",
-            github: "",
-            website: "",
-            portfolio: "",
+            linkedin: null,
+            github: null,
+            website: null,
+            portfolio: null,
           },
         };
 
@@ -75,28 +75,181 @@ export const ResumeProvider = ({ children, initialData }) => {
         return {
           company: "",
           title: "",
-          location: "",
+          location: null,
           start_date: "",
-          end_date: "",
+          end_date: null,
           description: "",
           technologies: [],
         };
+
       case "education":
         return {
           institution: "",
           degree: "",
           major: "",
-          minor: "",
-          gpa: "",
+          minor: null,
+          gpa: null,
           graduation_date: "",
           relevant_courses: [],
         };
+
       case "skills":
-        return { name: "", keywords: [] };
+        return {
+          name: "",
+          proficiency: "",
+          keywords: [],
+        };
+
       case "projects":
-        return { name: "", description: "", link: "" };
+        return {
+          name: "",
+          description: "",
+          link: null,
+        };
+
+      case "awards_and_recognition":
+        return {
+          title: "",
+          issuing_organization: "",
+          date_received: "",
+          description: "",
+        };
+
+      case "volunteer_and_social_activities":
+        return {
+          organization: "",
+          position: "",
+          start_date: "",
+          end_date: "",
+          description: "",
+        };
+
+      case "certifications":
+        return {
+          name: "",
+          issuing_authority: "",
+          date_obtained: "",
+          expiry_date: null,
+        };
+
       case "languages":
-        return { language: "", proficiency: "" };
+        return {
+          language: "",
+          proficiency: "",
+        };
+
+      case "interests":
+        return {
+          name: "",
+          keywords: [],
+        };
+
+      case "references":
+        return {
+          name: "",
+          position: "",
+          company: "",
+          email: "",
+          phone: [],
+          relationship: "",
+          years_known: "",
+        };
+
+      case "publications":
+        return {
+          title: "",
+          authors: [],
+          publication_date: "",
+          publisher: "",
+          link: null,
+          description: "",
+        };
+
+      case "courses":
+        return {
+          title: "",
+          institution: "",
+          completion_date: "",
+          link: null,
+          description: "",
+        };
+
+      case "conferences":
+        return {
+          name: "",
+          date: "",
+          location: "",
+          link: null,
+          description: "",
+        };
+
+      case "speaking_engagements":
+        return {
+          title: "",
+          event: "",
+          date: "",
+          location: "",
+          audience_size: null,
+          video_link: null,
+          slides_link: null,
+        };
+
+      case "patents":
+        return {
+          title: "",
+          patent_number: "",
+          filing_date: "",
+          issue_date: null,
+          status: "",
+          inventors: [],
+          description: "",
+        };
+
+      case "professional_memberships":
+        return {
+          organization: "",
+          role: "",
+          start_date: "",
+          end_date: null,
+          benefits: [],
+        };
+
+      case "military_service":
+        return {
+          branch: "",
+          rank: "",
+          start_date: "",
+          end_date: "",
+          location: "",
+          duties: [],
+          awards: [],
+        };
+
+      case "teaching_experience":
+        return {
+          institution: "",
+          position: "",
+          subject: "",
+          start_date: "",
+          end_date: null,
+          description: "",
+          student_level: "",
+          class_size: null,
+        };
+
+      case "research_experience":
+        return {
+          institution: "",
+          project: "",
+          role: "",
+          start_date: "",
+          end_date: null,
+          description: "",
+          funding_source: null,
+          publications: [],
+          collaborators: [],
+        };
+
       default:
         return {};
     }
