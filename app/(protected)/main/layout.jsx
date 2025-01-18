@@ -54,15 +54,15 @@ export default function Layout({ children }) {
     );
 
     return (
-        <div className="min-h-screen surface-ground">
+        <div>
             {/* <Menubar
                 start={start}
                 end={end}
                 className="border-noround surface-card shadow-2 relative z-1"
             /> */}
-            <div className="p-4">
+            {/* {/* <div className="p-4"> */}
                 {children}
-            </div>
+            {/* </div> */}
         </div>
     );
 }
