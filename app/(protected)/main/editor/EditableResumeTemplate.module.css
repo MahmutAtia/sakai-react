@@ -4,6 +4,7 @@
     scrollbar-color: var(--primary-color) var(--surface-ground);
     height: calc(100vh - 8rem); /* Adjust height to fit within the viewport */
     overflow-y: auto;
+    margin: 2rem;
 }
 
 .scrollableContent::-webkit-scrollbar {

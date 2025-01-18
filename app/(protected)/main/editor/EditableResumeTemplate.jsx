@@ -16,23 +16,37 @@ import 'primeflex/primeflex.css';
 import styles from './EditableResumeTemplate.module.css';
 
 const EditableResumeTemplate = () => {
-    const { data, setData } = useResume();
+    const { data } = useResume();
     const [loading, setLoading] = useState(false);
     const [hiddenSections, setHiddenSections] = useState([]);
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const NON_ARRAY_SECTIONS = ['personal_information', 'summary', 'objective'];
     const [sectionOrder, setSectionOrder] = useState([
-        'personal_information',
-        'summary',
-        'objective',
-        'experience',
-        'education',
-        'projects',
-        'skills',
-        'languages'
+        "personal_information",
+        "summary",
+        "experience",
+        "education",
+        "projects",
+        "skills",
+        "languages",
+        "awards_and_recognition",
+        "volunteer_and_social_activities",
+        "certifications",
+        "interests",
+        "references",
+        "publications",
+        "courses",
+        "conferences",
+        "speaking_engagements",
+        "patents",
+        "professional_memberships",
+        "military_service",
+        "teaching_experience",
+        "research_experience",
     ]);
     const sectionRefs = useRef({});
 
+    // Check if a section is empty
     const isSectionEmpty = (key) => {
         if (!data[key]) return true;
 
@@ -43,14 +57,17 @@ const EditableResumeTemplate = () => {
         return Array.isArray(data[key]) && data[key].length === 0;
     };
 
+    // Toggle section visibility
     const toggleSectionVisibility = (sectionKey) => {
-        setHiddenSections(prev =>
+        setHiddenSections((prev) =>
             prev.includes(sectionKey)
-                ? prev.filter(key => key !== sectionKey)
+                ? prev.filter((key) => key !== sectionKey)
                 : [...prev, sectionKey]
         );
+
     };
 
+    // Handle reordering of sections
     const handleReorderSections = (result) => {
         if (!result.destination) return;
 
@@ -62,6 +79,9 @@ const EditableResumeTemplate = () => {
         localStorage.setItem('sectionOrder', JSON.stringify(newOrder));
     };
 
+
+
+    // Render the appropriate component for each section
     const renderSection = (sectionKey) => {
         const isEmpty = isSectionEmpty(sectionKey);
 
@@ -82,40 +102,29 @@ const EditableResumeTemplate = () => {
             case 'languages':
                 return <Languages sectionKey={sectionKey} />;
             default:
-                return data[`${sectionKey}_config`] ? (
-                    <GenericSection
-                        sectionKey={sectionKey}
-                        fields={data[`${sectionKey}_config`].fields || []}
-                    />
-                ) : null;
+                return <GenericSection sectionKey={sectionKey} />;
         }
     };
 
+    // Load section order from localStorage on mount
     useEffect(() => {
-        const savedOrder = localStorage.getItem('sectionOrder');
-        if (savedOrder) {
-            setSectionOrder(JSON.parse(savedOrder));
-        }
+        // const savedOrder = localStorage.getItem('sectionOrder');
+        // if (savedOrder) {
+        //     setSectionOrder(JSON.parse(savedOrder));
+        // }
+
+        // Set the initial visibility of sections
+        setHiddenSections(sectionOrder.filter((key) => isSectionEmpty(key)));
     }, []);
 
     return (
-        <div className="surface-ground h-full">
-            {/* Sidebar Toggle Button for Small Screens */}
-            <div className="lg:hidden p-3 flex justify-content-start align-items-center surface-ground">
-                <Button
-                    icon="pi pi-bars"
-                    className="p-button-text"
-                    onClick={() => setSidebarVisible(!sidebarVisible)}
-                />
-            </div>
-
+        <div className="surface-ground h-full flex">
             {/* Sidebar */}
             <div className={`${styles.sidebar} ${sidebarVisible ? styles.sidebarVisible : ''}`}>
-                <div className="p-4 border-bottom-1 surface-border backdrop-blur-sm bg-white-alpha-90">
-                    <h2 className="text-xl font-semibold text-900 m-0">Resume Builder</h2>
+                <div className="surface-card p-4 border-bottom-1 surface-border backdrop-blur-sm bg-white-alpha-90">
                     <p className="text-600 text-sm mt-2 mb-0">Drag sections to reorder</p>
                 </div>
-                <div className="p-3">
+                <div className="p-3 custom-scroll" style={{ maxHeight: 'calc(100vh - 100px)', overflowY: 'auto' }}>
                     <Accordion multiple activeIndex={[0]} className="surface-ground">
                         <AccordionTab
                             header={
@@ -133,7 +142,7 @@ const EditableResumeTemplate = () => {
                                             ref={provided.innerRef}
                                             className="flex flex-column gap-2 mt-2"
                                         >
-                                            {sectionOrder && sectionOrder.map((sectionKey, index) => {
+                                            {sectionOrder.map((sectionKey, index) => {
                                                 if (!sectionKey) return null; // Guard clause for undefined keys
 
                                                 const isEmpty = isSectionEmpty(sectionKey);
@@ -165,7 +174,9 @@ const EditableResumeTemplate = () => {
                                                                         ).join(' ')}
                                                                     </span>
                                                                     {isEmpty && (
-                                                                        <span className="text-sm text-500">(Empty)</span>
+                                                                        <span className="text-sm text-500 ml-2 p-1 border-round-sm bg-yellow-100">
+                                                                            Empty
+                                                                        </span>
                                                                     )}
                                                                 </div>
                                                                 <i
@@ -196,7 +207,7 @@ const EditableResumeTemplate = () => {
             )}
 
             {/* Main Content Area */}
-            <div className={`${styles.mainContent}`}>
+            <div className={`${styles.mainContent} flex-grow-1`}>
                 <div className="h-full flex justify-content-center p-2 lg:p-4">
                     {loading && (
                         <div className="fixed top-50 left-50 -translate-x-50 -translate-y-50 z-5">
@@ -224,6 +235,9 @@ const EditableResumeTemplate = () => {
             </div>
         </div>
     );
+
 };
 
+
 export default EditableResumeTemplate;
+
