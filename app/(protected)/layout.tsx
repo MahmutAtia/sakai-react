@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function SimpleLayout({ children }: SimpleLayoutProps) {
     return (
         <React.Fragment>
-            <AppBar />
+            {/* <AppBar /> */}
 
             {children}
             <AppConfig simple />
