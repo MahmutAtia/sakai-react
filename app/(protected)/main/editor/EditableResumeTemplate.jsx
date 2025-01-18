@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from 'primereact/button';
 import PersonalInformation from "./components/PersonalInformation";
 import Summary from "./components/Summary";
@@ -13,12 +13,13 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import 'primeflex/primeflex.css';
-import './s.css'
+import './s.css';
 
 const EditableResumeTemplate = () => {
     const { data, setData } = useResume();
     const [loading, setLoading] = useState(false);
-    const [customSections, setCustomSections] = useState([]);
+    const [hiddenSections, setHiddenSections] = useState([]);
+    const NON_ARRAY_SECTIONS = ['personal_information', 'summary', 'objective'];
     const [sectionOrder, setSectionOrder] = useState([
         'personal_information',
         'summary',
@@ -29,51 +30,34 @@ const EditableResumeTemplate = () => {
         'skills',
         'languages'
     ]);
+    const sectionRefs = useRef({});
 
-    const isActiveSection = (key) => {
-        if (key in ['personal_information', 'summary', 'objective']
+    const isSectionEmpty = (key) => {
+        if (!data[key]) return true;
 
-        ) {
-            return Boolean(data[key]);
+        if (NON_ARRAY_SECTIONS.includes(key)) {
+            return Object.keys(data[key]).length === 0;
         }
-        return Boolean(data[key] && Array.isArray(data[key]) && data[key].length > 0);
+
+        return Array.isArray(data[key]) && data[key].length === 0;
     };
 
-    const availableSections = sectionOrder.map(key => ({
-        key,
-        title: key.split('_').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' '),
-        active: isActiveSection(key)
-    }));
-
-    const handleAddSection = async (sectionKey) => {
-        setLoading(true);
-        try {
-            const newData = { ...data };
-            if (!newData[sectionKey]) {
-                newData[sectionKey] = sectionKey in ['personal_information', 'summary', 'objective'] ? {} : [];
-            }
-            await setData(newData);
-        } finally {
-            setLoading(false);
-        }
+    const toggleSectionVisibility = (sectionKey) => {
+        setHiddenSections(prev =>
+            prev.includes(sectionKey)
+                ? prev.filter(key => key !== sectionKey)
+                : [...prev, sectionKey]
+        );
     };
 
     const handleReorderSections = async (sourceIndex, destinationIndex) => {
         setLoading(true);
         try {
-            const activeSectionKeys = availableSections
-                .filter(section => section.active)
-                .map(section => section.key);
-
+            const activeSectionKeys = sectionOrder.filter(key => !hiddenSections.includes(key));
             const [movedSection] = activeSectionKeys.splice(sourceIndex, 1);
             activeSectionKeys.splice(destinationIndex, 0, movedSection);
 
-            const newOrder = sectionOrder.filter(key =>
-                !activeSectionKeys.includes(key)
-            );
-
+            const newOrder = sectionOrder.filter(key => !activeSectionKeys.includes(key));
             activeSectionKeys.forEach((key, index) => {
                 const originalIndex = sectionOrder.indexOf(key);
                 if (originalIndex !== -1) {
@@ -89,9 +73,7 @@ const EditableResumeTemplate = () => {
     };
 
     const renderSection = (sectionKey) => {
-        if (!data[sectionKey] && !data[`${sectionKey}_config`]) {
-            return null;
-        }
+        const isEmpty = isSectionEmpty(sectionKey);
 
         switch (sectionKey) {
             case 'personal_information':
@@ -127,7 +109,7 @@ const EditableResumeTemplate = () => {
     }, []);
 
     return (
-        <div className="grid grid-nogutter h-screen surface-ground overflow-hidden"> {/* Add overflow-hidden */}
+        <div className="grid grid-nogutter h-screen surface-ground overflow-hidden">
             {/* Left Sidebar */}
             <div className="col-fixed w-20rem h-screen surface-section border-right-1 surface-border">
                 <div className="p-4 border-bottom-1 surface-border backdrop-blur-sm bg-white-alpha-90">
@@ -135,36 +117,12 @@ const EditableResumeTemplate = () => {
                     <p className="text-600 text-sm mt-2 mb-0">Drag sections to reorder</p>
                 </div>
                 <div className="p-3">
-                    <Accordion multiple activeIndex={[0, 1]} className="surface-ground">
-                        <AccordionTab
-                            className="mb-2"
-                            header={
-                                <div className="flex align-items-center gap-2">
-                                    <i className="pi pi-plus-circle text-primary"></i>
-                                    <span className="font-medium text-900">Available Sections</span>
-                                </div>
-                            }
-                        >
-                            <div className="flex flex-column gap-2 mt-2">
-                                {availableSections
-                                    .filter((section) => !section.active)
-                                    .map((section) => (
-                                        <Button
-                                            key={section.key}
-                                            label={section.title}
-                                            icon="pi pi-plus"
-                                            className="p-button-text p-button-plain w-full text-left justify-content-start hover:surface-100 transition-colors transition-duration-150"
-                                            onClick={() => handleAddSection(section.key)}
-                                        />
-                                    ))}
-                            </div>
-                        </AccordionTab>
-
+                    <Accordion multiple activeIndex={[0]} className="surface-ground">
                         <AccordionTab
                             header={
                                 <div className="flex align-items-center gap-2">
                                     <i className="pi pi-list text-primary"></i>
-                                    <span className="font-medium text-900">Active Sections</span>
+                                    <span className="font-medium text-900">Sections</span>
                                 </div>
                             }
                         >
@@ -181,12 +139,12 @@ const EditableResumeTemplate = () => {
                                             ref={provided.innerRef}
                                             className="flex flex-column gap-2 mt-2"
                                         >
-                                            {availableSections
-                                                .filter((section) => section.active)
-                                                .map((section, index) => (
+                                            {sectionOrder.map((sectionKey, index) => {
+                                                const isEmpty = isSectionEmpty(sectionKey);
+                                                return (
                                                     <Draggable
-                                                        key={section.key}
-                                                        draggableId={section.key}
+                                                        key={sectionKey}
+                                                        draggableId={sectionKey}
                                                         index={index}
                                                     >
                                                         {(provided, snapshot) => (
@@ -204,12 +162,25 @@ const EditableResumeTemplate = () => {
                                                                     }
                                                                 `}
                                                             >
-                                                                <span className="font-medium text-700">{section.title}</span>
-                                                                <i className="pi pi-bars text-600" />
+                                                                <div className="flex align-items-center gap-2">
+                                                                    <span className="font-medium text-700">
+                                                                        {sectionKey.split('_').map(word =>
+                                                                            word.charAt(0).toUpperCase() + word.slice(1)
+                                                                        ).join(' ')}
+                                                                    </span>
+                                                                    {isEmpty && (
+                                                                        <span className="text-sm text-500">(Empty)</span>
+                                                                    )}
+                                                                </div>
+                                                                <i
+                                                                    className={`pi ${hiddenSections.includes(sectionKey) ? 'pi-eye-slash' : 'pi-eye'} text-600 cursor-pointer`}
+                                                                    onClick={() => toggleSectionVisibility(sectionKey)}
+                                                                />
                                                             </div>
                                                         )}
                                                     </Draggable>
-                                                ))}
+                                                );
+                                            })}
                                             {provided.placeholder}
                                         </div>
                                     )}
@@ -222,7 +193,7 @@ const EditableResumeTemplate = () => {
 
             {/* Main Content Area */}
             <div className="col h-screen">
-                <div className="h-full overflow-y-auto scrollable-content"> {/* Add custom scroll class */}
+                <div className="h-full overflow-y-auto scrollable-content">
                     <div className="p-4 flex justify-content-center">
                         {loading && (
                             <div className="fixed top-50 left-50 -translate-x-50 -translate-y-50 z-5">
@@ -230,17 +201,27 @@ const EditableResumeTemplate = () => {
                             </div>
                         )}
                         <div className="surface-card p-6 border-round-xl shadow-2 w-full max-w-7xl">
-                            {sectionOrder.map(
-                                (sectionKey) =>
-                                    isActiveSection(sectionKey) && renderSection(sectionKey)
-                            )}
+                            {sectionOrder.map((sectionKey) => {
+                                const isEmpty = isSectionEmpty(sectionKey);
+                                return (
+                                    !hiddenSections.includes(sectionKey) && (
+                                        <div key={sectionKey} ref={sectionRefs.current[sectionKey]}>
+                                            {renderSection(sectionKey)}
+                                            {isEmpty && (
+                                                <div className="text-center text-500 mt-2">
+                                                    This section is empty. Add content to make it visible.
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     );
-
 };
 
 export default EditableResumeTemplate;
