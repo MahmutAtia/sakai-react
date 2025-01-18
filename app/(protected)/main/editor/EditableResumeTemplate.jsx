@@ -31,7 +31,9 @@ const EditableResumeTemplate = () => {
     ]);
 
     const isActiveSection = (key) => {
-        if (key === 'personal_information') {
+        if (key in ['personal_information', 'summary', 'objective']
+
+        ) {
             return Boolean(data[key]);
         }
         return Boolean(data[key] && Array.isArray(data[key]) && data[key].length > 0);
@@ -133,7 +135,7 @@ const EditableResumeTemplate = () => {
                     <p className="text-600 text-sm mt-2 mb-0">Drag sections to reorder</p>
                 </div>
                 <div className="p-3">
-                    <Accordion multiple  activeIndex={[0,1]} className="surface-ground">
+                    <Accordion multiple activeIndex={[0, 1]} className="surface-ground">
                         <AccordionTab
                             className="mb-2"
                             header={
