@@ -8,6 +8,7 @@ import EditableResumeTemplate from '../EditableResumeTemplate';
 import { ResumeProvider } from '../ResumeContext';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
+import 'primeflex/primeflex.css';
 
 const ResumeEditorPage = ({ params }) => {
     const [loading, setLoading] = useState(true);
@@ -15,6 +16,7 @@ const ResumeEditorPage = ({ params }) => {
     const router = useRouter();
     const toast = useRef(null);
     const { data: session, status } = useSession();
+
     useEffect(() => {
         const fetchResumeData = async () => {
             if (status === 'loading') return;
@@ -23,7 +25,6 @@ const ResumeEditorPage = ({ params }) => {
 
             // If data is in local storage, get the resume data with the id from local storage
             const data = localStorage.getItem('data');
-
 
             if (data) {
                 // Data is an array of objects which contains the resume
@@ -65,37 +66,38 @@ const ResumeEditorPage = ({ params }) => {
         fetchResumeData();
     }, [params.id, session, status]);
 
-    if (loading) return <div> <ProgressSpinner /> </div>;
-    if (!resumeData) return <div>No resume found</div>;
-
+    if (loading) return <div className="flex justify-content-center align-items-center h-screen"><ProgressSpinner /></div>;
+    if (!resumeData) return <div className="flex justify-content-center align-items-center h-screen">No resume found</div>;
 
     return (
-        <div className="surface-ground min-h-screen">
-            <Toast ref={toast} />
-
-            <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 mb-4">
-                <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
-                <div className="flex gap-2">
-                    <Button
-                        icon="pi pi-download"
-                        label="Export"
-                        className="p-button-outlined"
-                        onClick={() => router.push(`/main/template2/${params.id}`)}
-                    />
-                    <Button
-                        icon="pi pi-save"
-                        label="Save"
-                        severity="success"
-                    />
+        <div className="h-screen overflow-hidden">
+            <div className="flex flex-column h-full">
+                {/* Header */}
+                <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg">
+                    <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
+                    <div className="flex gap-2">
+                        <Button
+                            icon="pi pi-download"
+                            label="Export"
+                            className="p-button-outlined"
+                            onClick={() => router.push(`/main/template2/${params.id}`)}
+                        />
+                        <Button
+                            icon="pi pi-save"
+                            label="Save"
+                            severity="success"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            <div className="p-4">
-                {resumeData && (
-                    <ResumeProvider initialData={resumeData}>
-                        <EditableResumeTemplate />
-                    </ResumeProvider>
-                )}
+                {/* Content */}
+                <div className="flex-1 relative m-4">
+                    {resumeData && (
+                        <ResumeProvider initialData={resumeData}>
+                            <EditableResumeTemplate />
+                        </ResumeProvider>
+                    )}
+                </div>
             </div>
         </div>
     );

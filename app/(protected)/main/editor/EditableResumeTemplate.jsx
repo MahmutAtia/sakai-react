@@ -1,9 +1,5 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { Dialog } from 'primereact/dialog';
+import { useEffect, useState } from 'react';
 import { Button } from 'primereact/button';
-import { Dropdown } from 'primereact/dropdown';
-import { InputText } from 'primereact/inputtext';
 import PersonalInformation from "./components/PersonalInformation";
 import Summary from "./components/Summary";
 import Experience from "./components/Experience";
@@ -12,30 +8,17 @@ import Projects from "./components/Projects";
 import Skills from "./components/Skills";
 import Languages from "./components/Languages";
 import { useResume } from "./ResumeContext";
-import LeftSidebar from "./components/LeftSidebar";
 import GenericSection from "./components/GenericSection";
 import { ProgressSpinner } from 'primereact/progressspinner';
-
+import { Accordion, AccordionTab } from 'primereact/accordion';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import 'primeflex/primeflex.css';
+import './s.css'
 
 const EditableResumeTemplate = () => {
     const { data, setData } = useResume();
-    const [sidebarVisible, setSidebarVisible] = useState(false);
     const [loading, setLoading] = useState(false);
-    // Add state for custom sections
     const [customSections, setCustomSections] = useState([]);
-
-    // Modify SECTION_ORDER to include custom sections
-    const SECTION_ORDER = [
-        'personal_information',
-        'summary',
-        'objective',
-        'experience',
-        'education',
-        'projects',
-        'skills',
-        'languages',
-        ...customSections
-    ];
     const [sectionOrder, setSectionOrder] = useState([
         'personal_information',
         'summary',
@@ -49,7 +32,7 @@ const EditableResumeTemplate = () => {
 
     const isActiveSection = (key) => {
         if (key === 'personal_information') {
-            return Boolean(data[key]); // Check just existence
+            return Boolean(data[key]);
         }
         return Boolean(data[key] && Array.isArray(data[key]) && data[key].length > 0);
     };
@@ -61,13 +44,13 @@ const EditableResumeTemplate = () => {
         ).join(' '),
         active: isActiveSection(key)
     }));
+
     const handleAddSection = async (sectionKey) => {
         setLoading(true);
         try {
             const newData = { ...data };
             if (!newData[sectionKey]) {
                 newData[sectionKey] = sectionKey in ['personal_information', 'summary', 'objective'] ? {} : [];
-
             }
             await setData(newData);
         } finally {
@@ -78,21 +61,17 @@ const EditableResumeTemplate = () => {
     const handleReorderSections = async (sourceIndex, destinationIndex) => {
         setLoading(true);
         try {
-            // Get active sections only
             const activeSectionKeys = availableSections
                 .filter(section => section.active)
                 .map(section => section.key);
 
-            // Reorder within active sections
             const [movedSection] = activeSectionKeys.splice(sourceIndex, 1);
             activeSectionKeys.splice(destinationIndex, 0, movedSection);
 
-            // Create new order preserving inactive sections
             const newOrder = sectionOrder.filter(key =>
                 !activeSectionKeys.includes(key)
             );
 
-            // Insert active sections in their new order
             activeSectionKeys.forEach((key, index) => {
                 const originalIndex = sectionOrder.indexOf(key);
                 if (originalIndex !== -1) {
@@ -102,14 +81,12 @@ const EditableResumeTemplate = () => {
 
             setSectionOrder(newOrder);
             localStorage.setItem('sectionOrder', JSON.stringify(newOrder));
-
         } finally {
             setLoading(false);
         }
     };
 
     const renderSection = (sectionKey) => {
-        // Check if section exists in data
         if (!data[sectionKey] && !data[`${sectionKey}_config`]) {
             return null;
         }
@@ -140,7 +117,6 @@ const EditableResumeTemplate = () => {
         }
     };
 
-    // Load saved order on mount
     useEffect(() => {
         const savedOrder = localStorage.getItem('sectionOrder');
         if (savedOrder) {
@@ -149,34 +125,120 @@ const EditableResumeTemplate = () => {
     }, []);
 
     return (
-        <div className="flex flex-column gap-4 relative">
-            {loading && (
-                <div className="fixed top-50 left-50 z-5">
-                    <ProgressSpinner />
+        <div className="grid grid-nogutter h-screen surface-ground overflow-hidden"> {/* Add overflow-hidden */}
+            {/* Left Sidebar */}
+            <div className="col-fixed w-20rem h-screen surface-section border-right-1 surface-border">
+                <div className="p-4 border-bottom-1 surface-border backdrop-blur-sm bg-white-alpha-90">
+                    <h2 className="text-xl font-semibold text-900 m-0">Resume Builder</h2>
+                    <p className="text-600 text-sm mt-2 mb-0">Drag sections to reorder</p>
                 </div>
-            )}
+                <div className="p-3">
+                    <Accordion multiple  activeIndex={[0,1]} className="surface-ground">
+                        <AccordionTab
+                            className="mb-2"
+                            header={
+                                <div className="flex align-items-center gap-2">
+                                    <i className="pi pi-plus-circle text-primary"></i>
+                                    <span className="font-medium text-900">Available Sections</span>
+                                </div>
+                            }
+                        >
+                            <div className="flex flex-column gap-2 mt-2">
+                                {availableSections
+                                    .filter((section) => !section.active)
+                                    .map((section) => (
+                                        <Button
+                                            key={section.key}
+                                            label={section.title}
+                                            icon="pi pi-plus"
+                                            className="p-button-text p-button-plain w-full text-left justify-content-start hover:surface-100 transition-colors transition-duration-150"
+                                            onClick={() => handleAddSection(section.key)}
+                                        />
+                                    ))}
+                            </div>
+                        </AccordionTab>
 
-            <Button
-                icon="pi pi-bars"
-                className="fixed left-0 top-0 m-3 p-button-rounded"
-                onClick={() => setSidebarVisible(true)}
-            />
+                        <AccordionTab
+                            header={
+                                <div className="flex align-items-center gap-2">
+                                    <i className="pi pi-list text-primary"></i>
+                                    <span className="font-medium text-900">Active Sections</span>
+                                </div>
+                            }
+                        >
+                            <DragDropContext
+                                onDragEnd={(result) => {
+                                    if (!result.destination) return;
+                                    handleReorderSections(result.source.index, result.destination.index);
+                                }}
+                            >
+                                <Droppable droppableId="sections">
+                                    {(provided) => (
+                                        <div
+                                            {...provided.droppableProps}
+                                            ref={provided.innerRef}
+                                            className="flex flex-column gap-2 mt-2"
+                                        >
+                                            {availableSections
+                                                .filter((section) => section.active)
+                                                .map((section, index) => (
+                                                    <Draggable
+                                                        key={section.key}
+                                                        draggableId={section.key}
+                                                        index={index}
+                                                    >
+                                                        {(provided, snapshot) => (
+                                                            <div
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                className={`
+                                                                    surface-card border-round-lg
+                                                                    p-3 flex align-items-center justify-content-between
+                                                                    cursor-pointer transition-all transition-duration-200
+                                                                    ${snapshot.isDragging
+                                                                        ? "shadow-4"
+                                                                        : "shadow-1 hover:shadow-2"
+                                                                    }
+                                                                `}
+                                                            >
+                                                                <span className="font-medium text-700">{section.title}</span>
+                                                                <i className="pi pi-bars text-600" />
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                ))}
+                                            {provided.placeholder}
+                                        </div>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
+                        </AccordionTab>
+                    </Accordion>
+                </div>
+            </div>
 
-            <LeftSidebar
-                visible={sidebarVisible}
-                onHide={() => setSidebarVisible(false)}
-                sections={availableSections}
-                onAddSection={handleAddSection}
-                onReorderSections={handleReorderSections}
-            />
-
-            <div className="resume-container surface-card p-4 border-round-xl shadow-2 max-w-4xl mx-auto">
-                {sectionOrder.map((sectionKey) => (
-                    isActiveSection(sectionKey) && renderSection(sectionKey)
-                ))}
+            {/* Main Content Area */}
+            <div className="col h-screen">
+                <div className="h-full overflow-y-auto scrollable-content"> {/* Add custom scroll class */}
+                    <div className="p-4 flex justify-content-center">
+                        {loading && (
+                            <div className="fixed top-50 left-50 -translate-x-50 -translate-y-50 z-5">
+                                <ProgressSpinner strokeWidth="3" />
+                            </div>
+                        )}
+                        <div className="surface-card p-6 border-round-xl shadow-2 w-full max-w-7xl">
+                            {sectionOrder.map(
+                                (sectionKey) =>
+                                    isActiveSection(sectionKey) && renderSection(sectionKey)
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
+
 };
 
 export default EditableResumeTemplate;
