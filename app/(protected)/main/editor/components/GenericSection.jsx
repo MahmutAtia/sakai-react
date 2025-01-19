@@ -54,6 +54,7 @@ const GenericSection = ({ sectionKey }) => {
 
         // Store complete current state
         const currentState = { ...data[sectionKey][index] };
+        console.log('currentState', currentState);
         historyRef.current[index].push(currentState);
 
         // Update data
@@ -128,40 +129,43 @@ const GenericSection = ({ sectionKey }) => {
             detail: 'Item has been removed'
         });
     };
-
     const handleAIUpdate = async (index, item) => {
         try {
-            // Save current state to history
+            // Initialize history
             if (!historyRef.current[index]) {
                 historyRef.current[index] = [];
             }
-            historyRef.current[index].push(JSON.stringify({ ...item }));
 
-            // AI update logic here
+            // Store current state
+            const currentState = { ...data[sectionKey][index] };
+            historyRef.current[index].push(currentState);
+
+            // Preserve field order by using template
+            const template = getDefaultItem(sectionKey);
+            const orderedItem = Object.keys(template).reduce((acc, key) => {
+                acc[key] = item[key] || '';
+                return acc;
+            }, {});
+
+            // Update data with ordered fields
             const newData = { ...data };
-            newData[sectionKey][index] = {
-                ...newData[sectionKey][index],
-                ...item // Use updated data from AI
-            };
+            newData[sectionKey][index] = orderedItem;
             setData(newData);
-
-
 
             toast.current.show({
                 severity: 'success',
                 summary: 'AI Updated',
-                detail: 'Item has been updated'
+                detail: 'Content has been updated'
             });
         } catch (error) {
             console.error('AI Update Error:', error);
             toast.current.show({
                 severity: 'error',
                 summary: 'Update Failed',
-                detail: 'Failed to update item'
+                detail: 'Failed to update content'
             });
         }
     };
-
 
     return (
         <SectionWrapper title={sectionKey.split('_').map(word =>
