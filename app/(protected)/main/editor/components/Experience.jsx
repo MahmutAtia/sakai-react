@@ -55,7 +55,6 @@ const Experience = ({ sectionKey }) => {
                 behavior: 'smooth',
                 block: 'center'
             });
-            setTimeout(() => setShowArrow(false), 1000);
         }, 100);
     };
     const handleAIUpdate = async (index, updatedData) => {
@@ -132,7 +131,7 @@ const Experience = ({ sectionKey }) => {
 
     return (<SectionWrapper
         title="Experience" onAdd={addExperience} toast={toast}
-        className="scroll-mt-[100px]"
+        className="scroll-mt-[120px] pt-4"
     >
         {experiences.map((exp, index) => (
 

@@ -73,8 +73,8 @@ const ResumeEditorPage = ({ params }) => {
         <div className="h-screen overflow-hidden surface-ground">
             <div className="flex flex-column h-full">
                 {/* Header */}
-                <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg">
-                    <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
+                <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg sticky top-0 z-5">
+                <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
                     <div className="flex gap-2">
                         <Button
                             icon="pi pi-download"
@@ -91,7 +91,7 @@ const ResumeEditorPage = ({ params }) => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 relative">
+                <div className="flex-1 overflow-auto">
                     {resumeData && (
                         <ResumeProvider initialData={resumeData}>
                             <EditableResumeTemplate />
