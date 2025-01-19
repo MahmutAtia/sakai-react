@@ -119,12 +119,20 @@ const EditableResumeTemplate = () => {
 
     return (
         <div className="surface-ground h-full flex">
+            {/* Sidebar Toggle Button */}
+            <button
+                className={`${styles.sidebarToggleButton} `}
+                onClick={() => setSidebarVisible(!sidebarVisible)}
+            >
+                <i className="pi pi-bars"></i>
+            </button>
+
             {/* Sidebar */}
             <div className={`${styles.sidebar} ${sidebarVisible ? styles.sidebarVisible : ''}`}>
                 <div className="surface-card p-4 border-bottom-1 surface-border backdrop-blur-sm bg-white-alpha-90">
                     <p className="text-600 text-sm mt-2 mb-0">Drag sections to reorder</p>
                 </div>
-                <div className="p-3 custom-scroll" style={{ maxHeight: 'calc(100vh - 100px)', overflowY: 'auto' }}>
+                <div className={styles.sidebarContent}>
                     <Accordion multiple activeIndex={[0]} className="surface-ground">
                         <AccordionTab
                             header={

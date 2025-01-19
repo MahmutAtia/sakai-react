@@ -1,3 +1,45 @@
+/* Add a button to toggle the sidebar visibility */
+.sidebarToggleButton {
+    display: none; /* Hide by default */
+    position: fixed;
+    top: 7rem;
+    left: 1rem;
+    z-index: 1001;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sidebarToggleButton:hover {
+    background-color: var(--primary-600);
+}
+
+/* Show the toggle button on smaller screens */
+@media (max-width: 1023px) {
+    .sidebarToggleButton {
+        display: block;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebarVisible {
+        transform: translateX(0);
+    }
+
+    .mainContent {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* Existing CSS */
 .scrollableContent {
     scroll-behavior: smooth;
     scrollbar-width: thin;
@@ -37,10 +79,11 @@
 /* Sidebar Styles */
 .sidebar {
     position: fixed;
-    top: 8rem; /* Position below the header */
+    top: 7rem; /* Position below the header */
     left: 0;
-    width: 20rem;
+    width: 22rem;
     height: calc(100vh - 4rem); /* Adjust height to fit below the header */
+    padding-bottom: 2rem; /* Add bottom padding for last element visibility */
     background-color: var(--surface-section);
     z-index: 1000;
     transform: translateX(-100%);
@@ -73,6 +116,7 @@
         width: calc(100% - 20rem); /* Ensure main content takes up remaining space */
     }
 }
+
 .draggableSection {
     transition: all 0.2s ease;
     position: relative;
@@ -109,9 +153,34 @@
     -webkit-user-select: none;
     user-select: none;
     margin: 0 ;
-
 }
 
 .dragHandle:active {
     cursor: grabbing;
+}
+
+.sidebarContent {
+    max-height: calc(100vh - 12rem); /* Account for header + top bar */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface-ground);
+    padding: 1rem;
+}
+
+.sidebarContent::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebarContent::-webkit-scrollbar-track {
+    background: var(--surface-ground);
+    border-radius: 4px;
+}
+
+.sidebarContent::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.sidebarContent::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-600);
 }

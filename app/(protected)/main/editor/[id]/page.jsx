@@ -91,7 +91,7 @@ const ResumeEditorPage = ({ params }) => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1 overflow-hidden">
                     {resumeData && (
                         <ResumeProvider initialData={resumeData}>
                             <EditableResumeTemplate />
