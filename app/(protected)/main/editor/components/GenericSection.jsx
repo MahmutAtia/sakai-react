@@ -36,20 +36,34 @@ const GenericSection = ({ sectionKey }) => {
         setData(newData);
         setNewItemIndex(newIndex);
         toggleEditMode(sectionKey, items.length);
+
+        setTimeout(() => {
+            lastItemRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }, 100);
     };
 
+
     const handleInputChange = (index, field, value) => {
-        const newData = { ...data };
-        if (!Array.isArray(newData[sectionKey])) {
-            newData[sectionKey] = [];
+        // Save current state before changes
+        if (!historyRef.current[index]) {
+            historyRef.current[index] = [];
         }
+
+        // Store complete current state
+        const currentState = { ...data[sectionKey][index] };
+        historyRef.current[index].push(currentState);
+
+        // Update data
+        const newData = { ...data };
         newData[sectionKey][index] = {
             ...newData[sectionKey][index],
             [field]: value
         };
         setData(newData);
     };
-
     const renderFields = (item, index, isEditing) => {
         if (!item) return null;
 
@@ -72,13 +86,47 @@ const GenericSection = ({ sectionKey }) => {
     };
 
 
+
+
     const handleUndo = (index) => {
         if (historyRef.current[index]?.length > 0) {
+            // Get previous state without JSON parsing
             const previousState = historyRef.current[index].pop();
+
+            // Update data with previous state
             const newData = { ...data };
             newData[sectionKey][index] = previousState;
             setData(newData);
+
+            toast.current.show({
+                severity: 'info',
+                summary: 'Undo',
+                detail: 'Previous state restored'
+            });
         }
+    };
+
+
+    const handleDelete = (index) => {
+        if (isItemEditing(index)) {
+            toggleEditMode(sectionKey, index);
+        }
+        removeSectionItem(sectionKey, index);
+
+        setTimeout(() => {
+            if (firstItemRef.current) {
+                firstItemRef.current.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }, 100);
+
+        toast.current.show({
+            severity: 'success',
+            summary: 'Deleted',
+            detail: 'Item has been removed'
+        });
     };
 
     const handleAIUpdate = async (index, item) => {
@@ -96,6 +144,8 @@ const GenericSection = ({ sectionKey }) => {
                 ...item // Use updated data from AI
             };
             setData(newData);
+
+
 
             toast.current.show({
                 severity: 'success',
@@ -126,8 +176,8 @@ const GenericSection = ({ sectionKey }) => {
                     onEdit={() => toggleEditMode(sectionKey, index)}
                     onUndo={() => handleUndo(index)}
                     onAIUpdate={(updatedData) => handleAIUpdate(index, updatedData)}
-                    canUndo={historyRef.current[index]?.length > 0}                    sectionData={item}
-                    onDelete={() => removeSectionItem(sectionKey, index)}
+                    canUndo={historyRef.current[index]?.length > 0} sectionData={item}
+                    onDelete={() => handleDelete(index)}
 
                     editContent={
                         <div className="flex flex-column gap-3">

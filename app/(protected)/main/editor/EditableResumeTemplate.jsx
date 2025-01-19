@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button } from 'primereact/button';
 import PersonalInformation from "./components/PersonalInformation";
 import Summary from "./components/Summary";
@@ -57,14 +57,25 @@ const EditableResumeTemplate = () => {
         return Array.isArray(data[key]) && data[key].length === 0;
     };
 
-    // Toggle section visibility
     const toggleSectionVisibility = (sectionKey) => {
-        setHiddenSections((prev) =>
-            prev.includes(sectionKey)
+        setHiddenSections((prev) => {
+            const newHiddenSections = prev.includes(sectionKey)
                 ? prev.filter((key) => key !== sectionKey)
-                : [...prev, sectionKey]
-        );
+                : [...prev, sectionKey];
 
+            if (!newHiddenSections.includes(sectionKey)) {
+                setTimeout(() => {
+                    const element = document.getElementById(`section-${sectionKey}`);
+                    if (element) {
+                        element.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }, 100);
+            }
+            return newHiddenSections;
+        });
     };
 
     // Handle reordering of sections
@@ -83,28 +94,83 @@ const EditableResumeTemplate = () => {
 
     // Render the appropriate component for each section
     const renderSection = (sectionKey) => {
+        if (hiddenSections.includes(sectionKey)) return null;
+
         const isEmpty = isSectionEmpty(sectionKey);
 
         switch (sectionKey) {
             case 'personal_information':
-                return <PersonalInformation sectionKey={sectionKey} />;
+                return <div
+                    key={sectionKey}
+                    id={`section-${sectionKey}`}
+                    className="scroll-mt-[120px]"
+                >
+                    <PersonalInformation sectionKey={sectionKey} />
+                </div>
             case 'summary':
-            case 'objective':
-                return <Summary sectionKey={sectionKey} />;
+                return <div
+                    key={sectionKey}
+                    id={`section-${sectionKey}`}
+                    className="scroll-mt-[120px]"
+                >
+                    <Summary sectionKey={sectionKey} />
+                </div>
             case 'experience':
-                return <Experience sectionKey={sectionKey} />;
+                return <div
+                    key={sectionKey}
+                    id={`section-${sectionKey}`}
+                    className="scroll-mt-[120px]"
+                >
+                    <Experience sectionKey={sectionKey} />
+                </div>
             case 'education':
-                return <Education sectionKey={sectionKey} />;
+                return <div
+                    key={sectionKey}
+                    id={`section-${sectionKey}`}
+                    className="scroll-mt-[120px]"
+                >
+                    <Education sectionKey={sectionKey} />
+                </div>
             case 'projects':
-                return <Projects sectionKey={sectionKey} />;
+                return <div
+                    key={sectionKey}
+                    id={`section-${sectionKey}`}
+
+                    className="scroll-mt-[120px]"
+                >
+                    <Projects sectionKey={sectionKey} />
+                </div>
             case 'skills':
-                return <Skills sectionKey={sectionKey} />;
+                return <div
+                    key={sectionKey}
+                    id={`section-${sectionKey}`}
+                    className="scroll-mt-[120px]"
+                >
+                    <Skills sectionKey={sectionKey} />
+                </div>
             case 'languages':
-                return <Languages sectionKey={sectionKey} />;
+                return <div
+                    key={sectionKey}
+                    id={`section-${sectionKey}`}
+                    className="scroll-mt-[120px]"
+                >
+                    <Languages sectionKey={sectionKey} />
+                </div>
             default:
-                return <GenericSection sectionKey={sectionKey} />;
+                return (
+                    <div
+
+
+                        key={sectionKey}
+                        id={`section-${sectionKey}`}
+                        className="scroll-mt-[120px]"
+                    >
+                        <GenericSection sectionKey={sectionKey} />
+                    </div>
+                );
         }
     };
+
 
     // Load section order from localStorage on mount
     useEffect(() => {
@@ -112,6 +178,10 @@ const EditableResumeTemplate = () => {
         // if (savedOrder) {
         //     setSectionOrder(JSON.parse(savedOrder));
         // }
+
+        sectionOrder.forEach(sectionKey => {
+            sectionRefs.current[sectionKey] = null;
+        });
 
         // Set the initial visibility of sections
         setHiddenSections(sectionOrder.filter((key) => isSectionEmpty(key)));
