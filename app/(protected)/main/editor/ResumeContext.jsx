@@ -115,20 +115,22 @@ const defaultItems = {
     personal_information: {
         name: "",
         email: "",
-        phone: [],
+        phone: "",
         location: {
             address: null,
             city: null,
             state: null,
-            postal_code: null,
+            postal_code: null
         },
         profiles: {
             linkedin: null,
             github: null,
             website: null,
-            portfolio: null,
-        },
+            portfolio: null
+        }
     },
+    summary: null,
+    objective: null,
     experience: {
         company: "",
         title: "",
@@ -136,7 +138,7 @@ const defaultItems = {
         start_date: "",
         end_date: null,
         description: "",
-        technologies: [],
+        technologies: []
     },
     education: {
         institution: "",
@@ -145,53 +147,55 @@ const defaultItems = {
         minor: null,
         gpa: null,
         graduation_date: "",
-        relevant_courses: [],
+        relevant_courses: []
     },
     skills: {
         name: "",
         proficiency: "",
-        keywords: [],
+        keywords: []
     },
     projects: {
         name: "",
         description: "",
-        link: null,
+        link: null
     },
     awards_and_recognition: {
         title: "",
         issuing_organization: "",
         date_received: "",
-        description: "",
+        description: ""
     },
     volunteer_and_social_activities: {
         organization: "",
         position: "",
         start_date: "",
         end_date: "",
-        description: "",
+        description: ""
     },
     certifications: {
         name: "",
         issuing_authority: "",
         date_obtained: "",
         expiry_date: null,
+        description: ""
     },
     languages: {
         language: "",
-        proficiency: "",
+        proficiency: ""
     },
     interests: {
         name: "",
-        keywords: [],
+        keywords: []
     },
     references: {
         name: "",
         position: "",
-        company: "",
+        company_or_institution: "",
         email: "",
-        phone: [],
+        phone: "",
         relationship: "",
         years_known: "",
+        description: ""
     },
     publications: {
         title: "",
@@ -199,21 +203,21 @@ const defaultItems = {
         publication_date: "",
         publisher: "",
         link: null,
-        description: "",
+        description: ""
     },
     courses: {
         title: "",
         institution: "",
         completion_date: "",
         link: null,
-        description: "",
+        description: ""
     },
     conferences: {
         name: "",
         date: "",
         location: "",
         link: null,
-        description: "",
+        description: ""
     },
     speaking_engagements: {
         title: "",
@@ -223,6 +227,7 @@ const defaultItems = {
         audience_size: null,
         video_link: null,
         slides_link: null,
+        description: ""
     },
     patents: {
         title: "",
@@ -231,7 +236,7 @@ const defaultItems = {
         issue_date: null,
         status: "",
         inventors: [],
-        description: "",
+        description: ""
     },
     professional_memberships: {
         organization: "",
@@ -239,6 +244,7 @@ const defaultItems = {
         start_date: "",
         end_date: null,
         benefits: [],
+        description: ""
     },
     military_service: {
         branch: "",
@@ -247,7 +253,7 @@ const defaultItems = {
         end_date: "",
         location: "",
         duties: [],
-        awards: [],
+        awards: []
     },
     teaching_experience: {
         institution: "",
@@ -257,7 +263,7 @@ const defaultItems = {
         end_date: null,
         description: "",
         student_level: "",
-        class_size: null,
+        class_size: null
     },
     research_experience: {
         institution: "",
@@ -268,7 +274,6 @@ const defaultItems = {
         description: "",
         funding_source: null,
         publications: [],
-        collaborators: [],
-    },
+        collaborators: []
+    }
 };
-

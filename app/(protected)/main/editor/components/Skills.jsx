@@ -168,10 +168,10 @@ const Skills = ({ sectionKey }) => {
                                 className="w-full"
                             />
                             <Dropdown
-                                placeholder="Level"
+                                placeholder="proficiency"
                                 value={skill.level}
                                 options={levelOptions}
-                                onChange={(e) => handleInputChange(index, 'level', e.value)}
+                                onChange={(e) => handleInputChange(index, 'proficiency', e.value)}
                                 className="w-full"
                             />
                             <div className="flex flex-column gap-2">

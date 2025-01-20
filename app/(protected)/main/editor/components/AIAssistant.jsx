@@ -4,7 +4,7 @@ import { InputText } from 'primereact/inputtext';
 import { Tooltip } from 'primereact/tooltip';
 import './styles.css';
 
-const AIAssistant = ({ sectionData, onUpdate }) => {
+const AIAssistant = ({ sectionData,sectionTitle, onUpdate }) => {
   const [showInput, setShowInput] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -16,9 +16,10 @@ const AIAssistant = ({ sectionData, onUpdate }) => {
       const response = await fetch('http://localhost:8000/api/resumes/edit/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, sectionData })
+        body: JSON.stringify({ prompt, sectionData, sectionTitle}),
       });
       const data = await response.json();
+      console.log(data);
       onUpdate(data);
       setPrompt('');
       setShowInput(false);

@@ -5,6 +5,7 @@ import AIAssistant from './AIAssistant';
 import UndoButton from './UndoButton';
 
 const ItemWrapper = ({
+    sectionTitle,
     isEditing,
     onEdit,
     onUndo,
@@ -35,6 +36,7 @@ const ItemWrapper = ({
                             <>
                                 <AIAssistant
                                     sectionData={sectionData}
+                                    sectionTitle={sectionTitle}
                                     onUpdate={onAIUpdate}
                                 />
                                 <Button

@@ -104,6 +104,7 @@ const PersonalInformation = ({ sectionKey }) => {
                                 />
                             )}
                             <AIAssistant
+                                sectionTitle={"Personal Information"}
                                 sectionData={personalInfo}
                                 onUpdate={handleAIUpdate}
                             />

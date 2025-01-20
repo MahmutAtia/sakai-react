@@ -70,6 +70,7 @@ const Summary = ({ sectionKey }) => {
                                 />
                             )}
                             <AIAssistant
+                                sectionTitle={sectionKey.charAt(0).toUpperCase() + sectionKey.slice(1)}
                                 sectionData={summary}
                                 onUpdate={handleAIUpdate}
                             />
