@@ -53,12 +53,13 @@ const PositionTemplatesPage = () => {
         return descriptions[type] || '';
     }
 
-    console.log('positions', positions);
     useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push('/login');
-            return;
-        }
+        // for now auth already in middleware leve
+
+        //     if (status === "unauthenticated") {
+        //         router.push('/login');
+        //         return;
+        //     }
 
         const fetchPositions = async () => {
             try {
@@ -161,7 +162,7 @@ const PositionTemplatesPage = () => {
             >
                 <div className="grid">
 
-                <div className="col-12 md:col-6 lg:col-3 p-3">
+                    <div className="col-12 md:col-6 lg:col-3 p-3">
                         <Card
                             className="h-full cursor-pointer transform transition-all hover:shadow-8"
                         >
@@ -177,7 +178,7 @@ const PositionTemplatesPage = () => {
                                 <div className="flex align-items-center gap-2 px-2">
                                     <i className="pi pi-file text-2xl text-primary"></i>
                                     <span className="text-xl font-medium">Resume</span>
-                                    </div>
+                                </div>
                                 <p className="text-600 line-height-3 m-0 px-2 pb-3">
                                     Professional summary of your experience and skills
                                 </p>
