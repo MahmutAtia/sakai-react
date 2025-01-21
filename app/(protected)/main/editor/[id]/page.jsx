@@ -34,33 +34,32 @@ const ResumeEditorPage = ({ params }) => {
                 return;
             }
 
-            // get the resume data from the backend ?
-            // try {
-            //     const response = await axios.get(
-            //         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/resumes/${params.id}`,
-            //         {
-            //             headers: {
-            //                 'Content-Type': 'application/json',
-            //                 ...(session?.accessToken && {
-            //                     'Authorization': `Bearer ${session.accessToken}`
-            //                 })
-            //             }
-            //         }
-            //     );
-            //     console.log(response);
-            //     const resume = response.data.resume;
-            //     setResumeData(resume);
-            //     console.log(resume);
-            // } catch (error) {
-            //     toast.current?.show({
-            //         severity: 'error',
-            //         summary: 'Error',
-            //         detail: error.message,
-            //         life: 3000
-            //     });
-            // } finally {
-            //     setLoading(false);
-            // }
+            // get the resume data from the backend if not exists in local storage
+            try {
+                const response = await axios.get(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/resumes/${params.id}`,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(session?.accessToken && {
+                                'Authorization': `Bearer ${session.accessToken}`
+                            })
+                        }
+                    }
+                );
+                const resume = response.data.resume;
+                setResumeData(resume);
+                console.log(resume);
+            } catch (error) {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: error.message,
+                    life: 3000
+                });
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchResumeData();
@@ -74,7 +73,7 @@ const ResumeEditorPage = ({ params }) => {
             <div className="flex flex-column h-full">
                 {/* Header */}
                 <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg sticky top-0 z-5">
-                <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
+                    <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
                     <div className="flex gap-2">
                         <Button
                             icon="pi pi-download"
