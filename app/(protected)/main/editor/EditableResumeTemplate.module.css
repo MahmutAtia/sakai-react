@@ -19,6 +19,125 @@
     background-color: var(--primary-600);
 }
 
+
+/* Existing CSS */
+.scrollableContent {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface-ground);
+    height: calc(100vh - 8rem); /* Adjust height to fit within the viewport */
+    overflow-y: auto;
+    margin: 2rem;
+}
+
+.scrollableContent::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollableContent::-webkit-scrollbar-track {
+    background: var(--surface-ground);
+}
+
+.scrollableContent::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.scrollableContent::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-600);
+}
+
+.sectionSpacing {
+    margin-bottom: 2rem; /* Add spacing between sections */
+}
+
+.surfaceCard {
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar Styles */
+.sidebar {
+    position: fixed;
+    top: 7rem; /* Position below the header */
+    left: 0;
+    width: 22rem;
+    height: calc(100vh - 4rem); /* Adjust height to fit below the header */
+    padding-bottom: 2rem; /* Add bottom padding for last element visibility */
+    background-color: var(--surface-section);
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebarVisible {
+    transform: translateX(0);
+}
+
+/* Overlay Styles */
+.overlay {
+    position: fixed;
+    top: 4rem; /* Position below the header */
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 4rem); /* Adjust height to fit below the header */
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+/* Main Content Adjustment for Larger Screens */
+@media (min-width: 1024px) {
+    .sidebar {
+        transform: translateX(0); /* Always visible on larger screens */
+    }
+
+    .mainContent {
+        margin-left: 20rem; /* Push main content to the right */
+        width: calc(100% - 20rem); /* Ensure main content takes up remaining space */
+    }
+}
+
+
+
+
+.sidebarContent {
+    max-height: calc(100vh - 12rem); /* Account for header + top bar */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface-ground);
+    padding: 1rem;
+}
+
+.sidebarContent::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebarContent::-webkit-scrollbar-track {
+    background: var(--surface-ground);
+    border-radius: 4px;
+}
+/* Add a button to toggle the sidebar visibility */
+.sidebarToggleButton {
+    display: none; /* Hide by default */
+    position: fixed;
+    top: 7rem;
+    left: 1rem;
+    z-index: 1001;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sidebarToggleButton:hover {
+    background-color: var(--primary-600);
+}
+
 /* Show the toggle button on smaller screens */
 @media (max-width: 1023px) {
     .sidebarToggleButton {
@@ -117,47 +236,7 @@
     }
 }
 
-.draggableSection {
-    transition: all 0.2s ease;
-    position: relative;
-    cursor: grab;
-    transform-origin: center center;
-    will-change: transform;
-    touch-action: none;
-}
 
-.draggableSection:active {
-    cursor: grabbing;
-}
-
-.draggingItem {
-    opacity: 0.9;
-    background: var(--surface-hover);
-    box-shadow: var(--shadow-4) !important;
-    /* Remove transform reset to maintain proper cursor position */
-    position: fixed; /* Use fixed positioning during drag */
-    cursor: grabbing;
-    z-index: 1000;
-}
-
-.dragHandle {
-    width: 24px;
-    height: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: grab;
-    position: relative;
-    touch-action: none;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    margin: 0 ;
-}
-
-.dragHandle:active {
-    cursor: grabbing;
-}
 
 .sidebarContent {
     max-height: calc(100vh - 12rem); /* Account for header + top bar */
@@ -174,6 +253,15 @@
 .sidebarContent::-webkit-scrollbar-track {
     background: var(--surface-ground);
     border-radius: 4px;
+}
+
+.sidebarContent::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.sidebarContent::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-600);
 }
 
 .sidebarContent::-webkit-scrollbar-thumb {
