@@ -1,11 +1,11 @@
 import { useFormContext, Controller } from 'react-hook-form'
 
 import { FormSection } from './FormSection'
-import { TEMPLATES } from '../../../../lib/templates/constants'
+import { TEMPLATES } from '../../../../../../lib/templates/constants'
 
-import { FormValues } from '../../../../types'
+import { FormValues } from '../../../../../types'
 
-export function TemplatesSection() {
+export default function TemplatesSection() {
   const { control } = useFormContext<FormValues>()
 
   return (
