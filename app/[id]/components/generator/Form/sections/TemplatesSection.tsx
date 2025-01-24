@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import styled from 'styled-components';
 import Lightbox from 'react-image-lightbox';
@@ -58,10 +58,12 @@ const TemplateButton = styled(Button)`
 
 const images = TEMPLATES.map(template => '/img/' + template + '.png');
 export function TemplatesSection() {
+
     const { control, watch } = useFormContext<FormValues>();
     const selectedTemplate = watch('selectedTemplate');
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
+    console.log("Selected template from temp:", selectedTemplate); // Debug log
 
     const showLightbox = (index: number) => {
         setIsLightboxOpen(true);
@@ -71,6 +73,7 @@ export function TemplatesSection() {
     const hideLightbox = () => {
         setIsLightboxOpen(false);
     };
+
 
     return (
         <FormSection title="Choose a Template">

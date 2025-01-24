@@ -54,6 +54,9 @@ export function Form({ resumeId }) {
 
     const [resume, setResume] = useAtom(resumeAtom)
     const formContext = useForm<FormValues>({ defaultValues: initialFormValues })
+    // watch to selectedTemplate changes
+    const selectedTemplate = formContext.watch('selectedTemplate');
+    console.log("Selected template: from form", selectedTemplate); // Debug log
 
     // TODO: move this to a custom react hook
     useEffect(() => {
@@ -82,8 +85,6 @@ export function Form({ resumeId }) {
                     selectedResume.hasOwnProperty(section) &&
                     (Array.isArray(selectedResume[section]) ? selectedResume[section].length > 0 : true)
                 );
-                const selectedTemplate = 1;
-
                 const structuredResume = {
                     headings,
                     sections,
@@ -99,7 +100,8 @@ export function Form({ resumeId }) {
             }
         }
 
-    }, [formContext])
+        handleFormSubmit();
+    }, [formContext, selectedTemplate]);
 
     const handleFormSubmit = useCallback(async () => {
         const formValues = formContext.getValues();
