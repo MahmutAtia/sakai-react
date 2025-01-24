@@ -50,8 +50,8 @@ const initialFormValues: FormValues = {
   selectedTemplate: 1,
 };
 
-export function Form() {
-const resumeId = 74
+export function Form({resumeId}) {
+
   const [resume, setResume] = useAtom(resumeAtom)
   const formContext = useForm<FormValues>({ defaultValues: initialFormValues })
 
@@ -98,11 +98,10 @@ const resumeId = 74
 }, [formContext])
 
   const handleFormSubmit = useCallback(async () => {
-    const formValues = formContext.getValues()
+    const formValues = formContext.getValues();
     setResume({ ...resume, isLoading: true })
     try {
       const newResumeUrl = await generateResume(formValues)
-      console.log("formValues", formValues)
       setResume({ ...resume, url: newResumeUrl, isLoading: false })
     } catch (error) {
       console.error(error)

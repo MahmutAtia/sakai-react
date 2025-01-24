@@ -1,5 +1,6 @@
 "use client";
 import dynamic from 'next/dynamic'
+import { useParams } from 'next/navigation';
 import styled from 'styled-components'
 
 import { Form } from './components/generator/Form'
@@ -22,11 +23,13 @@ const Main = styled.main`
 `
 
 export default function GeneratorPage() {
+    const { id: resumeId } = useParams();
+
   return (
     <Main>
       <Header />
       <Sidebar />
-      <Form />
+      <Form resumeId={resumeId} />
       <Preview />
     </Main>
   )
