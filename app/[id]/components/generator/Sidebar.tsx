@@ -7,7 +7,7 @@ import { colors } from '../../theme'
 import { PrimaryButton, IconButton } from '../core/Button'
 import TemplatesSection from './Form/sections/TemplatesSection'
 import { FormProvider, useForm } from 'react-hook-form'
-import { FormValues } from '../../../types'
+import { FormValues } from '../../../../types'
 
 const Aside = styled.aside`
   grid-area: sidebar;

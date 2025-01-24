@@ -4,12 +4,12 @@ import { useAtom } from 'jotai'
 import styled from 'styled-components'
 
 
-import { resumeAtom } from '../../../../atoms/resume'
-import { FormValues } from '../../../../types'
+import { resumeAtom } from '../../../../../atoms/resume'
+import { FormValues } from '../../../../../types'
 
-import latex from '../../../../../lib/latex'
-import getTemplateData from '../../../../../lib/templates'
-import { PrimaryButton } from '../../../components/core/Button'
+import latex from '../../../../../../lib/latex'
+import getTemplateData from '../../../../../../lib/templates'
+import { PrimaryButton } from '../../core/Button'
 
 async function generateResume(formData: FormValues): Promise<string> {
   const { texDoc, opts } = getTemplateData(formData)
