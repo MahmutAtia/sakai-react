@@ -70,12 +70,12 @@ const ResumeEditorPage = ({ params }) => {
         <div className="h-screen overflow-hidden surface-ground">
 
 
-                {/* Content */}
-                    {resumeData && (
-                        <ResumeProvider initialData={resumeData}>
-                            <EditableResumeTemplate resumeId={params.id} />
-                        </ResumeProvider>
-                    )}
+            {/* Content */}
+            {resumeData && (
+                <ResumeProvider initialData={resumeData}>
+                    <EditableResumeTemplate resumeId={params.id} />
+                </ResumeProvider>
+            )}
 
         </div>
     );

@@ -39,20 +39,20 @@ const ResumePage = styled(Page)`
 `
 
 export function Preview() {
-  const [resume] = useAtom(resumeAtom)
-  const [pageCount, setPageCount] = useState(1)
-  const [pageNumber] = useState(1)
-  const [scale] = useState(document.body.clientWidth > 1440 ? 1.75 : 1)
+    const [resume] = useAtom(resumeAtom)
+    const [pageCount, setPageCount] = useState(1)
+    const [pageNumber] = useState(1)
+    const [scale] = useState(document.body.clientWidth > 1440 ? 1.75 : 1)
 
-  const handleDocumentLoadSuccess = useCallback((pdf: PDFDocumentProxy) => {
-    setPageCount(pdf.numPages)
-  }, [])
+    const handleDocumentLoadSuccess = useCallback((pdf: PDFDocumentProxy) => {
+        setPageCount(pdf.numPages)
+    }, [])
 
-  return (
-    <Output>
-      <button onClick={() => window.open(resume.url)}>export as pdf</button>
-      <PdfContainer>
-        {/* <Toolbar
+    return (
+        <Output>
+            <button onClick={() => window.open(resume.url)}>export as pdf</button>
+            <PdfContainer>
+                {/* <Toolbar
           resumeURL={resumeURL || BlankPDF}
           jsonURL={jsonURL}
           downloadSource={downloadSource}
@@ -65,22 +65,22 @@ export function Preview() {
         />
         <LoadingBar status={status} /> */}
 
-        <ResumeDocument
-          file={resume.url || '/blank.pdf'}
-          onLoadSuccess={handleDocumentLoadSuccess}
-          loading= {<ProgressBar mode="indeterminate" style={{height: '6px'}} />}
-        >
-          <ResumePage
-            pageNumber={pageNumber}
-            scale={scale}
-            renderAnnotationLayer={false}
-            renderTextLayer={false}
-            loading= {<ProgressBar mode="indeterminate" style={{height: '6px'}} />}
-          />
-        </ResumeDocument>
-      </PdfContainer>
-    </Output>
-  )
+                <ResumeDocument
+                    file={resume.url || '/blank.pdf'}
+                    onLoadSuccess={handleDocumentLoadSuccess}
+                    loading={<ProgressBar mode="indeterminate" style={{ height: '6px' }} />}
+                >
+                    <ResumePage
+                        pageNumber={pageNumber}
+                        scale={scale}
+                        renderAnnotationLayer={false}
+                        renderTextLayer={false}
+                        loading={<ProgressBar mode="indeterminate" style={{ height: '6px' }} />}
+                    />
+                </ResumeDocument>
+            </PdfContainer>
+        </Output>
+    )
 }
 
 
