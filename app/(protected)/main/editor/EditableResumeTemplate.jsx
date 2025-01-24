@@ -16,7 +16,7 @@ import 'primeflex/primeflex.css';
 import styles from './EditableResumeTemplate.module.css';
 import { Toast } from 'primereact/toast';
 
-const EditableResumeTemplate = ({resumeId}) => {
+const EditableResumeTemplate = ({ resumeId }) => {
     const { data } = useResume();
     const [loading, setLoading] = useState(false);
     const [hiddenSections, setHiddenSections] = useState([]);
@@ -209,7 +209,7 @@ const EditableResumeTemplate = ({resumeId}) => {
 
     return (
         <div>
-            <Toast  ref={toast} />
+            <Toast ref={toast} />
             {/* Header */}
             <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg sticky top-0 z-5">
                 <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
@@ -230,133 +230,133 @@ const EditableResumeTemplate = ({resumeId}) => {
             </div>
             <div className="surface-ground h-full flex">
 
-            <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-hidden">
 
-            {/* Sidebar Toggle Button */}
-            <button
-                className={`${styles.sidebarToggleButton} `}
-                onClick={() => setSidebarVisible(!sidebarVisible)}
-            >
-                <i className="pi pi-bars"></i>
-            </button>
+                    {/* Sidebar Toggle Button */}
+                    <button
+                        className={`${styles.sidebarToggleButton} `}
+                        onClick={() => setSidebarVisible(!sidebarVisible)}
+                    >
+                        <i className="pi pi-bars"></i>
+                    </button>
 
-            {/* Sidebar */}
-            <div className={`${styles.sidebar} ${sidebarVisible ? styles.sidebarVisible : ''}`}>
-                <div className="surface-card p-4 border-bottom-1 surface-border backdrop-blur-sm bg-white-alpha-90">
-                    <p className="text-600 text-sm mt-2 mb-0">Drag sections to reorder</p>
-                </div>
-                <div className={styles.sidebarContent}>
-                    <Accordion multiple activeIndex={[0]} className="surface-ground">
-                        <AccordionTab
-                            header={
-                                <div className="flex align-items-center gap-2">
-                                    <i className="pi pi-list text-primary"></i>
-                                    <span className="font-medium text-900">Sections</span>
-                                </div>
-                            }
-                        >
-                            <DragDropContext onDragEnd={handleReorderSections}>
-                                <Droppable droppableId="sections">
-                                    {(provided) => (
-                                        <div
-                                            {...provided.droppableProps}
-                                            ref={provided.innerRef}
-                                            className="flex flex-column gap-2 mt-2"
-                                        >
-                                            {sectionOrder.map((sectionKey, index) => {
-                                                if (!sectionKey) return null; // Guard clause for undefined keys
+                    {/* Sidebar */}
+                    <div className={`${styles.sidebar} ${sidebarVisible ? styles.sidebarVisible : ''}`}>
+                        <div className="surface-card p-4 border-bottom-1 surface-border backdrop-blur-sm bg-white-alpha-90">
+                            <p className="text-600 text-sm mt-2 mb-0">Drag sections to reorder</p>
+                        </div>
+                        <div className={styles.sidebarContent}>
+                            <Accordion multiple activeIndex={[0]} className="surface-ground">
+                                <AccordionTab
+                                    header={
+                                        <div className="flex align-items-center gap-2">
+                                            <i className="pi pi-list text-primary"></i>
+                                            <span className="font-medium text-900">Sections</span>
+                                        </div>
+                                    }
+                                >
+                                    <DragDropContext onDragEnd={handleReorderSections}>
+                                        <Droppable droppableId="sections">
+                                            {(provided) => (
+                                                <div
+                                                    {...provided.droppableProps}
+                                                    ref={provided.innerRef}
+                                                    className="flex flex-column gap-2 mt-2"
+                                                >
+                                                    {sectionOrder.map((sectionKey, index) => {
+                                                        if (!sectionKey) return null; // Guard clause for undefined keys
 
-                                                const isEmpty = isSectionEmpty(sectionKey);
-                                                return (
-                                                    <Draggable
-                                                        key={sectionKey}
-                                                        draggableId={sectionKey}
-                                                        index={index}
-                                                    >
-                                                        {(provided, snapshot) => (
-                                                            <div
-                                                                ref={provided.innerRef}
-                                                                {...provided.draggableProps}
-                                                                {...provided.dragHandleProps}
-                                                                className={`
+                                                        const isEmpty = isSectionEmpty(sectionKey);
+                                                        return (
+                                                            <Draggable
+                                                                key={sectionKey}
+                                                                draggableId={sectionKey}
+                                                                index={index}
+                                                            >
+                                                                {(provided, snapshot) => (
+                                                                    <div
+                                                                        ref={provided.innerRef}
+                                                                        {...provided.draggableProps}
+                                                                        {...provided.dragHandleProps}
+                                                                        className={`
                                                                     surface-card border-round-lg
                                                                     p-3 flex align-items-center justify-content-between
                                                                     cursor-pointer transition-all transition-duration-200
                                                                     ${snapshot.isDragging
-                                                                        ? "shadow-4"
-                                                                        : "shadow-1 hover:shadow-2"
-                                                                    }
+                                                                                ? "shadow-4"
+                                                                                : "shadow-1 hover:shadow-2"
+                                                                            }
                                                                 `}
-                                                            >
-                                                                <div className="flex align-items-center gap-2">
-                                                                    <span className="font-medium text-700">
-                                                                        {sectionKey.split('_').map(word =>
-                                                                            word.charAt(0).toUpperCase() + word.slice(1)
-                                                                        ).join(' ')}
-                                                                    </span>
-                                                                    {isEmpty && (
-                                                                        <span className="text-sm text-500 ml-2 p-1 border-round-sm bg-yellow-100">
-                                                                            Empty
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                                <i
-                                                                    className={`pi ${hiddenSections.includes(sectionKey) ? 'pi-eye-slash' : 'pi-eye'} text-600 cursor-pointer`}
-                                                                    onClick={() => toggleSectionVisibility(sectionKey)}
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </Draggable>
-                                                );
-                                            })}
-                                            {provided.placeholder}
-                                        </div>
-                                    )}
-                                </Droppable>
-                            </DragDropContext>
-                        </AccordionTab>
-                    </Accordion>
-                </div>
-            </div>
-
-            {/* Overlay for Sidebar on Small Screens */}
-            {sidebarVisible && (
-                <div
-                    className={`${styles.overlay} lg:hidden`}
-                    onClick={() => setSidebarVisible(false)}
-                />
-            )}
-
-            {/* Main Content Area */}
-            <div className={`${styles.mainContent} flex-grow-1`}>
-                <div className="h-full flex justify-content-center p-2 lg:p-4">
-                    {loading && (
-                        <div className="fixed top-50 left-50 -translate-x-50 -translate-y-50 z-5">
-                            <ProgressSpinner strokeWidth="3" />
+                                                                    >
+                                                                        <div className="flex align-items-center gap-2">
+                                                                            <span className="font-medium text-700">
+                                                                                {sectionKey.split('_').map(word =>
+                                                                                    word.charAt(0).toUpperCase() + word.slice(1)
+                                                                                ).join(' ')}
+                                                                            </span>
+                                                                            {isEmpty && (
+                                                                                <span className="text-sm text-500 ml-2 p-1 border-round-sm bg-yellow-100">
+                                                                                    Empty
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <i
+                                                                            className={`pi ${hiddenSections.includes(sectionKey) ? 'pi-eye-slash' : 'pi-eye'} text-600 cursor-pointer`}
+                                                                            onClick={() => toggleSectionVisibility(sectionKey)}
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </Draggable>
+                                                        );
+                                                    })}
+                                                    {provided.placeholder}
+                                                </div>
+                                            )}
+                                        </Droppable>
+                                    </DragDropContext>
+                                </AccordionTab>
+                            </Accordion>
                         </div>
+                    </div>
+
+                    {/* Overlay for Sidebar on Small Screens */}
+                    {sidebarVisible && (
+                        <div
+                            className={`${styles.overlay} lg:hidden`}
+                            onClick={() => setSidebarVisible(false)}
+                        />
                     )}
-                    <div className={`${styles.surfaceCard} ${styles.scrollableContent} w-full`}>
-                        {sectionOrder.map((sectionKey) => {
-                            const isEmpty = isSectionEmpty(sectionKey);
-                            return (
-                                !hiddenSections.includes(sectionKey) && (
-                                    <div key={sectionKey} ref={sectionRefs.current[sectionKey]} className={styles.sectionSpacing}>
-                                        {renderSection(sectionKey)}
-                                        {isEmpty && (
-                                            <div className="text-center text-500 mt-2">
-                                                This section is empty. Add content to make it visible.
+
+                    {/* Main Content Area */}
+                    <div className={`${styles.mainContent} flex-grow-1`}>
+                        <div className="h-full flex justify-content-center p-2 lg:p-4">
+                            {loading && (
+                                <div className="fixed top-50 left-50 -translate-x-50 -translate-y-50 z-5">
+                                    <ProgressSpinner strokeWidth="3" />
+                                </div>
+                            )}
+                            <div className={`${styles.surfaceCard} ${styles.scrollableContent} w-full`}>
+                                {sectionOrder.map((sectionKey) => {
+                                    const isEmpty = isSectionEmpty(sectionKey);
+                                    return (
+                                        !hiddenSections.includes(sectionKey) && (
+                                            <div key={sectionKey} ref={sectionRefs.current[sectionKey]} className={styles.sectionSpacing}>
+                                                {renderSection(sectionKey)}
+                                                {isEmpty && (
+                                                    <div className="text-center text-500 mt-2">
+                                                        This section is empty. Add content to make it visible.
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
-                                )
-                            );
-                        })}
+                                        )
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
     );
 
 };
