@@ -77,7 +77,11 @@ export function Form({ resumeId }) {
                     return acc;
                 }, {});
 
-                const sections = initialFormValues.sections.filter(section => selectedResume.hasOwnProperty(section) && selectedResume[section].length > 0);
+                // Filter sections in order
+                const sections = initialFormValues.sections.filter(section =>
+                    selectedResume.hasOwnProperty(section) &&
+                    (Array.isArray(selectedResume[section]) ? selectedResume[section].length > 0 : true)
+                );
                 const selectedTemplate = 1;
 
                 const structuredResume = {
