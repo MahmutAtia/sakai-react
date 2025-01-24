@@ -14,13 +14,15 @@ import { Accordion, AccordionTab } from 'primereact/accordion';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import 'primeflex/primeflex.css';
 import styles from './EditableResumeTemplate.module.css';
+import { Toast } from 'primereact/toast';
 
-const EditableResumeTemplate = () => {
+const EditableResumeTemplate = ({resumeId}) => {
     const { data } = useResume();
     const [loading, setLoading] = useState(false);
     const [hiddenSections, setHiddenSections] = useState([]);
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const NON_ARRAY_SECTIONS = ['personal_information', 'summary', 'objective'];
+    const toast = useRef(null);
     const [sectionOrder, setSectionOrder] = useState([
         "personal_information",
         "summary",
@@ -187,8 +189,49 @@ const EditableResumeTemplate = () => {
         setHiddenSections(sectionOrder.filter((key) => isSectionEmpty(key)));
     }, []);
 
+
+
+    const saveResumeData = () => {
+        console.log("data from save", data);
+        const localData = localStorage.getItem('data');
+        let resumes = localData ? JSON.parse(localData) : [];
+        console.log("resumes", data);
+        const existingResumeIndex = resumes.findIndex((item) => item.id === Number(resumeId));
+        if (existingResumeIndex !== -1) {
+            resumes[existingResumeIndex].resume = data;
+        } else {
+            resumes.push({ id: Number(params.id), resume: data });
+        }
+
+        localStorage.setItem('data', JSON.stringify(resumes));
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'Resume saved successfully' });
+    };
+
     return (
-        <div className="surface-ground h-full flex">
+        <div>
+            <Toast  ref={toast} />
+            {/* Header */}
+            <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg sticky top-0 z-5">
+                <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
+                <div className="flex gap-2">
+                    <Button
+                        icon="pi pi-download"
+                        label="Export"
+                        className="p-button-outlined"
+                        onClick={() => router.push(`/main/template2/${params.id}`)}
+                    />
+                    <Button
+                        icon="pi pi-save"
+                        label="Save"
+                        severity="success"
+                        onClick={saveResumeData}
+                    />
+                </div>
+            </div>
+            <div className="surface-ground h-full flex">
+
+            <div className="flex-1 overflow-hidden">
+
             {/* Sidebar Toggle Button */}
             <button
                 className={`${styles.sidebarToggleButton} `}
@@ -312,6 +355,8 @@ const EditableResumeTemplate = () => {
                 </div>
             </div>
         </div>
+    </div>
+</div>
     );
 
 };

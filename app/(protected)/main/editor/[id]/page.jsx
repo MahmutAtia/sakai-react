@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProgressSpinner } from 'primereact/progressspinner';
-import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import EditableResumeTemplate from '../EditableResumeTemplate';
 import { ResumeProvider } from '../ResumeContext';
@@ -65,39 +64,19 @@ const ResumeEditorPage = ({ params }) => {
         fetchResumeData();
     }, [params.id, session, status]);
 
-    if (loading) return <div className="flex justify-content-center align-items-center h-screen"><ProgressSpinner /></div>;
-    if (!resumeData) return <div className="flex justify-content-center align-items-center h-screen">No resume found</div>;
+
 
     return (
         <div className="h-screen overflow-hidden surface-ground">
-            <div className="flex flex-column h-full">
-                {/* Header */}
-                <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg sticky top-0 z-5">
-                    <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
-                    <div className="flex gap-2">
-                        <Button
-                            icon="pi pi-download"
-                            label="Export"
-                            className="p-button-outlined"
-                            onClick={() => router.push(`/main/template2/${params.id}`)}
-                        />
-                        <Button
-                            icon="pi pi-save"
-                            label="Save"
-                            severity="success"
-                        />
-                    </div>
-                </div>
+
 
                 {/* Content */}
-                <div className="flex-1 overflow-hidden">
                     {resumeData && (
                         <ResumeProvider initialData={resumeData}>
-                            <EditableResumeTemplate />
+                            <EditableResumeTemplate resumeId={params.id} />
                         </ResumeProvider>
                     )}
-                </div>
-            </div>
+
         </div>
     );
 };
