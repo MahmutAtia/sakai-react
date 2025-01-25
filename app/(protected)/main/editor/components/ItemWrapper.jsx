@@ -1,10 +1,11 @@
 import { ConfirmDialog } from 'primereact/confirmdialog';
 import { Button } from 'primereact/button';
-import { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import AIAssistant from './AIAssistant';
 import UndoButton from './UndoButton';
+import { debounce } from 'lodash';
 
-const ItemWrapper = ({
+const ItemWrapper = React.memo(({
     sectionTitle,
     isEditing,
     onEdit,
@@ -19,6 +20,25 @@ const ItemWrapper = ({
     isNewItem
 }) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const wrapperRef = useRef(null);
+
+    const handleClickOutside = useCallback((event) => {
+        if (wrapperRef.current && !wrapperRef.current.contains(event.target) && isEditing) {
+            onEdit();
+        }
+    }, [isEditing, onEdit]);
+
+    useEffect(() => {
+        const debouncedHandler = debounce(handleClickOutside, 100);
+        document.addEventListener('mousedown', debouncedHandler);
+        return () => {
+            document.removeEventListener('mousedown', debouncedHandler);
+        };
+    }, [handleClickOutside]);
+
+    const handleDeleteClick = useCallback(() => {
+        setShowDeleteDialog(true);
+    }, []);
 
     return (
         <div
@@ -28,23 +48,16 @@ const ItemWrapper = ({
             ${isNewItem ? 'animate-fadeIn animate-border' : ''}
         `}
         >
-            <div className="surface-card p-3 border-1 surface-border border-round">
+            <div className="surface-card p-3 border-1 surface-border border-round" ref={wrapperRef}>
                 <ConfirmDialog />
                 <div className="flex justify-content-between align-items-center mb-3">
                     <div className="flex gap-2 align-items-center">
                         {isEditing ? (
-                            <>
-                                <AIAssistant
-                                    sectionData={sectionData}
-                                    sectionTitle={sectionTitle}
-                                    onUpdate={onAIUpdate}
-                                />
-                                <Button
-                                    icon="pi pi-times"
-                                    className="p-button-rounded p-button-text"
-                                    onClick={onEdit}
-                                />
-                            </>
+                            <AIAssistant
+                                sectionData={sectionData}
+                                sectionTitle={sectionTitle}
+                                onUpdate={onAIUpdate}
+                            />
                         ) : (
                             <Button
                                 icon="pi pi-pencil"
@@ -58,7 +71,7 @@ const ItemWrapper = ({
                         <Button
                             icon="pi pi-trash"
                             className="p-button-rounded p-button-danger p-button-text"
-                            onClick={() => setShowDeleteDialog(true)}
+                            onClick={handleDeleteClick}
                             tooltip="Delete"
                         />
                         <ConfirmDialog
@@ -76,6 +89,8 @@ const ItemWrapper = ({
             </div>
         </div>
     );
-};
+});
+
+ItemWrapper.displayName = 'ItemWrapper';
 
 export default ItemWrapper;
