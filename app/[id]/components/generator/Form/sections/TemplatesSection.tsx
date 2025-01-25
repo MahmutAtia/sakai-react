@@ -61,9 +61,9 @@ export function TemplatesSection() {
 
     const { control, watch } = useFormContext<FormValues>();
     const selectedTemplate = watch('selectedTemplate');
+    console.log("Selected template: from section to debug", selectedTemplate); // Debug log
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
-    console.log("Selected template from temp:", selectedTemplate); // Debug log
 
     const showLightbox = (index: number) => {
         setIsLightboxOpen(true);
@@ -73,7 +73,9 @@ export function TemplatesSection() {
     const hideLightbox = () => {
         setIsLightboxOpen(false);
     };
-
+    useEffect(() => {
+        console.log("Template changed to:", selectedTemplate);
+    }, [selectedTemplate]);
 
     return (
         <FormSection title="Choose a Template">
