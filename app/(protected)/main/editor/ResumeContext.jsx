@@ -117,26 +117,26 @@ const defaultItems = {
         email: "",
         phone: "",
         location: {
-            address: null,
-            city: null,
-            state: null,
-            postal_code: null
+            address: "",
+            city: "",
+            state: "",
+            postal_code: ""
         },
         profiles: {
-            linkedin: null,
-            github: null,
-            website: null,
-            portfolio: null
+            linkedin: "",
+            github: "",
+            website: "",
+            portfolio: ""
         }
     },
-    summary: null,
-    objective: null,
+    summary: "",
+    objective: "",
     experience: {
         company: "",
         title: "",
-        location: null,
+        location: "",
         start_date: "",
-        end_date: null,
+        end_date: "",
         description: "",
         technologies: []
     },
@@ -144,8 +144,8 @@ const defaultItems = {
         institution: "",
         degree: "",
         major: "",
-        minor: null,
-        gpa: null,
+        minor: "",
+        gpa: "",
         graduation_date: "",
         relevant_courses: []
     },
@@ -157,7 +157,7 @@ const defaultItems = {
     projects: {
         name: "",
         description: "",
-        link: null
+        link: ""
     },
     awards_and_recognition: {
         title: "",
@@ -176,7 +176,7 @@ const defaultItems = {
         name: "",
         issuing_authority: "",
         date_obtained: "",
-        expiry_date: null,
+        expiry_date: "",
         description: ""
     },
     languages: {
@@ -202,21 +202,21 @@ const defaultItems = {
         authors: [],
         publication_date: "",
         publisher: "",
-        link: null,
+        link: "",
         description: ""
     },
     courses: {
         title: "",
         institution: "",
         completion_date: "",
-        link: null,
+        link: "",
         description: ""
     },
     conferences: {
         name: "",
         date: "",
         location: "",
-        link: null,
+        link: "",
         description: ""
     },
     speaking_engagements: {
@@ -224,16 +224,16 @@ const defaultItems = {
         event: "",
         date: "",
         location: "",
-        audience_size: null,
-        video_link: null,
-        slides_link: null,
+        audience_size: "",
+        video_link: "",
+        slides_link: "",
         description: ""
     },
     patents: {
         title: "",
         patent_number: "",
         filing_date: "",
-        issue_date: null,
+        issue_date: "",
         status: "",
         inventors: [],
         description: ""
@@ -242,7 +242,7 @@ const defaultItems = {
         organization: "",
         role: "",
         start_date: "",
-        end_date: null,
+        end_date: "",
         benefits: [],
         description: ""
     },
@@ -260,19 +260,19 @@ const defaultItems = {
         position: "",
         subject: "",
         start_date: "",
-        end_date: null,
+        end_date: "",
         description: "",
         student_level: "",
-        class_size: null
+        class_size: ""
     },
     research_experience: {
         institution: "",
         project: "",
         role: "",
         start_date: "",
-        end_date: null,
+        end_date: "",
         description: "",
-        funding_source: null,
+        funding_source: "",
         publications: [],
         collaborators: []
     }
