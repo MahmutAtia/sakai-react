@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import styled from 'styled-components';
 import Lightbox from 'react-image-lightbox';
 import { FormSection } from './FormSection';
 import { Button } from '../../../core/Button';
 import { colors } from '../../../../theme';
-import { TEMPLATES } from '../../../../../../../lib/templates/constants';
-import { FormValues } from '../../../../../../types';
+import { TEMPLATES } from '../../../../../../lib/templates/constants';
+import { FormValues } from '../../../../../types';
 import 'react-image-lightbox/style.css';
 
 const Grid = styled.div`
@@ -58,8 +58,10 @@ const TemplateButton = styled(Button)`
 
 const images = TEMPLATES.map(template => '/img/' + template + '.png');
 export function TemplatesSection() {
+
     const { control, watch } = useFormContext<FormValues>();
     const selectedTemplate = watch('selectedTemplate');
+    console.log("Selected template: from section to debug", selectedTemplate); // Debug log
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
 
@@ -71,6 +73,9 @@ export function TemplatesSection() {
     const hideLightbox = () => {
         setIsLightboxOpen(false);
     };
+    useEffect(() => {
+        console.log("Template changed to:", selectedTemplate);
+    }, [selectedTemplate]);
 
     return (
         <FormSection title="Choose a Template">
