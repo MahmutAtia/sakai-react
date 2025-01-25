@@ -1,342 +1,249 @@
-import { stripIndent, source } from 'common-tags'
-import { WHITESPACE } from './constants'
-import type { FormValues, Generator } from '../../types'
+import { stripIndent, source } from 'common-tags';
+import { WHITESPACE } from './constants';
+import { FormValues, Generator } from '../../types';
 
-const generator: Generator = {
-  profileSection(basics) {
-    if (!basics) {
-      return ''
+// Utility function to escape LaTeX special characters
+function escapeLatex(text) {
+    if (typeof text !== 'string') {
+      return text; // Return the input as-is if it's not a string
     }
 
-    const { name, email, phone, location = {}, website } = basics
-    const websiteLine = website ? `\\href{${website}}{${website}}` : ''
+    // Escape special LaTeX characters
+    return text
+      .replace(/\\/g, '\\textbackslash') // Escape backslashes first
+      .replace(/&/g, '\\&')
+      .replace(/%/g, '\\%')
+      .replace(/\$/g, '\\$')
+      .replace(/#/g, '\\#')
+      .replace(/_/g, '\\_')
+      .replace(/{/g, '\\{')
+      .replace(/}/g, '\\}')
+      .replace(/~/g, '\\textasciitilde')
+      .replace(/\^/g, '\\textasciicircum');
+  }
 
-    const info = [email, phone, location.address, websiteLine]
+
+const generator: Generator = {
+  resumeHeader() {
+    return stripIndent`
+      % This CV example/template is based on a clean design
+      % Adapted for use with modern LaTeX packages
+      \\documentclass[a4paper,skipsamekey,11pt,english]{curve}
+
+      % Load settings and customisations
+      \\usepackage{./public/settings}
+
+      % Define bibliography style
+      \\PassOptionsToPackage{style=ieee,sorting=ydnt,uniquename=init,defernumbers=true}{biblatex}
+
+      % Load fonts
+      \\ifxetexorluatex
+        \\usepackage{fontspec}
+        \\usepackage[p,osf,swashQ]{cochineal}
+        \\usepackage[medium,bold]{cabin}
+        \\usepackage[varqu,varl,scale=0.9]{zi4}
+      \\else
+        \\usepackage[T1]{fontenc}
+        \\usepackage[p,osf,swashQ]{cochineal}
+        \\usepackage{cabin}
+        \\usepackage[varqu,varl,scale=0.9]{zi4}
+      \\fi
+
+      % Define colours and markers
+      % \\definecolor{SwishLineColour}{HTML}{00FFFF}
+      % \\definecolor{MarkerColour}{HTML}{0000CC}
+      % \\prefixmarker{\\$diamond$}
+
+      % Include fullonly for photo
+      \\includecomment{fullonly}
+    `;
+  },
+
+  personalInformationSection(personalInformation) {
+    if (!personalInformation) {
+      return '';
+    }
+
+    const { name, email, phone, location, profiles } = personalInformation;
+    const { linkedin, github, website, portfolio } = profiles || {};
+
+    const address = location?.address || '';
+    const city = location?.city || '';
+    const state = location?.state || '';
+    const postalCode = location?.postal_code || '';
+
+    const locationLine = [address, city, state, postalCode]
       .filter(Boolean)
-      .join(' | ')
+      .map(escapeLatex)
+      .join(', ');
+
+    const profileLines = [
+      linkedin ? `\\href{${escapeLatex(linkedin)}}{LinkedIn}` : '',
+      github ? `\\href{${escapeLatex(github)}}{GitHub}` : '',
+      website ? `\\href{${escapeLatex(website)}}{Website}` : '',
+      portfolio ? `\\href{${escapeLatex(portfolio)}}{Portfolio}` : '',
+    ]
+      .filter(Boolean)
+      .join(' $\\cdot$ ');
 
     return stripIndent`
-      \\begin{tabular*}{7in}{l@{\\extracolsep{\\fill}}r}
-      \\textbf{\\Large ${name}} & \\textit{${info}}
-      \\end{tabular*}
-    `
+      %==== Personal Information ====%
+      \\leftheader{%
+        {\\LARGE\\bfseries\\sffamily ${escapeLatex(name)}}
+
+        \\makefield{\\faEnvelope[regular]}{\\href{mailto:${escapeLatex(email)}}{\\texttt{${escapeLatex(email)}}}}
+        \\makefield{\\faLinkedin}{\\href{${escapeLatex(linkedin)}}{\\texttt{${escapeLatex(linkedin)}}}}
+        \\makefield{\\faGlobe}{\\url{${escapeLatex(website)}}}
+
+        ${locationLine ? `\\makefield{\\faMapMarker}{${escapeLatex(locationLine)}}` : ''}
+        ${phone ? `\\makefield{\\faPhone}{${escapeLatex(phone)}}` : ''}
+      }
+
+      \\rightheader{~}
+      \\begin{fullonly}
+        \\photo[r]{public/template2/img/photo}
+        \\photoscale{0.13}
+      \\end{fullonly}
+
+      \\title{Curriculum Vitae}
+    `;
+  },
+
+  experienceSection(experience, heading) {
+    if (!experience) {
+      return '';
+    }
+
+    return source`
+      %==== Experience ====%
+      \\makerubric{${escapeLatex(heading || 'employment')}}
+      ${experience.map((job) => {
+        const { company, title, location, start_date, end_date, description, technologies } = job;
+
+        let line1 = `\\textbf{${escapeLatex(company)}}`;
+        if (location) {
+          line1 += ` \\hfill ${escapeLatex(location)}`;
+        }
+
+        let line2 = `\\textit{${escapeLatex(title)}}`;
+        if (start_date && end_date) {
+          line2 += ` \\hfill ${escapeLatex(start_date)} - ${escapeLatex(end_date)}`;
+        } else if (start_date) {
+          line2 += ` \\hfill ${escapeLatex(start_date)} - Present`;
+        }
+
+        let descriptionLines = '';
+        if (description) {
+          descriptionLines = `\\begin{itemize} \\itemsep 1pt \\item ${escapeLatex(description)} \\end{itemize}`;
+        }
+
+        if (technologies && technologies.length > 0) {
+          descriptionLines += `\\textbf{Technologies:} ${technologies.map(escapeLatex).join(', ')}`;
+        }
+
+        return stripIndent`
+          ${line1} \\\\
+          ${line2} \\\\
+          ${descriptionLines}
+          \\vspace*{2mm}
+        `;
+      })}
+    `;
   },
 
   educationSection(education, heading) {
     if (!education) {
-      return ''
+      return '';
     }
 
     return source`
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\resheading{${heading || 'Education'}}
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\begin{itemize}[leftmargin=*]
-
+      %==== Education ====%
+      \\makerubric{${escapeLatex(heading || 'education')}}
       ${education.map((school) => {
-        const {
-          institution = '',
-          location = '',
-          studyType = '',
-          area = '',
-          score = '',
-          startDate = '',
-          endDate = ''
-        } = school
+        const { institution, degree, major, minor, gpa, graduation_date, relevant_courses } = school;
 
-        let formattedLocation = ''
-
-        if (location) {
-          formattedLocation = location + '\\\\'
+        let line1 = `\\textbf{${escapeLatex(institution)}}`;
+        let line2 = `${escapeLatex(degree)}`;
+        if (major) {
+          line2 += ` in ${escapeLatex(major)}`;
+        }
+        if (minor) {
+          line2 += `, Minor in ${escapeLatex(minor)}`;
+        }
+        if (gpa) {
+          line2 += ` \\textit{GPA: ${escapeLatex(gpa)}}`;
+        }
+        if (graduation_date) {
+          line2 += ` \\hfill ${escapeLatex(graduation_date)}`;
         }
 
-        let degreeLine = ''
-
-        if (studyType && area) {
-          degreeLine = `${studyType} ${area}`
-        } else if (studyType || area) {
-          degreeLine = studyType || area
-        }
-
-        if (score) {
-          degreeLine += degreeLine ? `, GPA: ${score}` : `GPA: ${score}`
-        }
-
-        let dateRange = ''
-
-        if (startDate && endDate) {
-          dateRange = `${startDate} | ${endDate}`
-        } else if (startDate) {
-          dateRange = `${startDate} | Present`
-        } else {
-          dateRange = endDate
+        let coursesLine = '';
+        if (relevant_courses && relevant_courses.length > 0) {
+          coursesLine = `\\textbf{Relevant Courses:} ${relevant_courses.map(escapeLatex).join(', ')}`;
         }
 
         return stripIndent`
-          \\item[]
-            \\school
-              {${institution || ''}}
-              {${formattedLocation || ''}}
-              {${degreeLine}}
-              {${dateRange || ''}}
-        `
+          ${line1} \\\\
+          ${line2} \\\\
+          ${coursesLine}
+          \\vspace*{2mm}
+        `;
       })}
-
-      \\end{itemize}
-    `
-  },
-
-  workSection(work, heading) {
-    if (!work) {
-      return ''
-    }
-
-    return source`
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\resheading{${heading || 'Experience'}}
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\begin{itemize}[leftmargin=*]
-      ${work.map((job) => {
-        const { name, position, location, startDate, endDate, highlights } = job
-
-        let dateRange
-        let dutyLines
-
-        if (startDate && endDate) {
-          dateRange = `${startDate} | ${endDate}`
-        } else if (startDate) {
-          dateRange = `${startDate} | Present`
-        } else {
-          dateRange = endDate
-        }
-
-        if (highlights) {
-          dutyLines = source`
-            \\begin{itemize}
-              ${highlights.map((duty) => `\\item ${duty}`)}
-            \\end{itemize}
-            `
-        }
-
-        return stripIndent`
-          \\item[]
-            \\job
-              {${name || ''}}
-              {${location || ''}}
-              {${position || ''}}
-              {${dateRange || ''}}
-              ${dutyLines}
-        `
-      })}
-      \\end{itemize}
-    `
+    `;
   },
 
   skillsSection(skills, heading) {
     if (!skills) {
-      return ''
+      return '';
     }
 
     return source`
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\resheading{${heading || 'Skills'}}
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\begin{itemize}[leftmargin=*]
-      \\setlength\\itemsep{0em}
+      %==== Skills ====%
+      \\makerubric{${escapeLatex(heading || 'skills')}}
+      \\begin{tabularx}{\\textwidth}{ l X }
       ${skills.map((skill) => {
-        const { name = '', keywords = [] } = skill
-        return `\\item[] \\skill{${name}}{${keywords.join(', ')}}`
+        const { name = 'Misc', keywords = [] } = skill;
+        return `${escapeLatex(name)}: & ${keywords.map(escapeLatex).join(', ')} \\\\`;
       })}
-      \\end{itemize}
-    `
+      \\end{tabularx}
+      \\vspace{2mm}
+    `;
   },
-
-  projectsSection(projects, heading) {
-    if (!projects) {
-      return ''
-    }
-
-    return source`
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\resheading{${heading || 'Projects'}}
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\begin{itemize}[leftmargin=*]
-      ${projects.map((project) => {
-        const { name = '', description = '', keywords = [], url = '' } = project
-
-        const descriptionWithNewline = description
-          ? `\\\\${description}`
-          : description
-        const urlLine = url ? `\\href{${url}}{${url}}` : ''
-
-        return stripIndent`
-          \\item[]
-            \\project
-              {${name}}
-              {${keywords.join(', ')}}
-              {${urlLine}}
-              {${descriptionWithNewline}}
-        `
-      })}
-      \\end{itemize}
-    `
-  },
-
-  awardsSection(awards, heading) {
-    if (!awards) {
-      return ''
-    }
-
-    return source`
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\resheading{${heading || 'Awards'}}
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\begin{itemize}[leftmargin=*]
-      ${awards.map((award) => {
-        const { title = '', summary = '', date = '', awarder = '' } = award
-
-        const summaryWithNewline = summary ? `\\\\${summary}` : summary
-
-        return stripIndent`
-          \\item[]
-            \\award
-              {${title}}
-              {${date}}
-              {${awarder}}
-              {${summaryWithNewline}}
-        `
-      })}
-      \\end{itemize}
-    `
-  },
-
-  resumeHeader() {
-    return stripIndent`
-      % (c) 2002 Matthew Boedicker <mboedick@mboedick.org> (original author) http://mboedick.org
-      % (c) 2003-2007 David J. Grant <davidgrant-at-gmail.com> http://www.davidgrant.ca
-      % (c) 2008 Nathaniel Johnston <nathaniel@nathanieljohnston.com> http://www.nathanieljohnston.com
-      %
-      % (c) 2012 Scott Clark <sc932@cornell.edu> cam.cornell.edu/~sc932
-      %
-      %This work is licensed under the Creative Commons Attribution-Noncommercial-Share Alike 2.5 License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/2.5/ or send a letter to Creative Commons, 543 Howard Street, 5th Floor, San Francisco, California, 94105, USA.
-
-      \\documentclass[11pt]{article}
-      \\newlength{\\outerbordwidth}
-      \\pagestyle{empty}
-      \\raggedbottom
-      \\raggedright
-      \\usepackage[svgnames]{xcolor}
-      \\usepackage{framed}
-      \\usepackage{tocloft}
-      \\usepackage{enumitem}
-      \\usepackage{textcomp}
-      \\usepackage[utf8]{inputenc}
-      \\usepackage[T1]{fontenc}
-      \\usepackage[hidelinks]{hyperref}
-
-
-      %-----------------------------------------------------------
-      %Edit these values as you see fit
-
-      \\setlength{\\outerbordwidth}{3pt}  % Width of border outside of title bars
-      \\definecolor{shadecolor}{gray}{0.75}  % Outer background color of title bars (0 = black, 1 = white)
-      \\definecolor{shadecolorB}{gray}{0.93}  % Inner background color of title bars
-
-
-      %-----------------------------------------------------------
-      %Margin setup
-
-      \\setlength{\\evensidemargin}{-0.25in}
-      \\setlength{\\headheight}{0in}
-      \\setlength{\\headsep}{0in}
-      \\setlength{\\oddsidemargin}{-0.25in}
-      \\setlength{\\tabcolsep}{0in}
-      \\setlength{\\textheight}{9.5in}
-      \\setlength{\\textwidth}{7in}
-      \\setlength{\\topmargin}{-0.3in}
-      \\setlength{\\topskip}{0in}
-      \\setlength{\\voffset}{0.1in}
-
-
-      %-----------------------------------------------------------
-      %Custom commands
-      \\newcommand{\\resitem}[1]{\\item #1 \\vspace{-4pt}}
-      \\newcommand{\\resheading}[1]{
-        \\parbox{\\textwidth}{\\setlength{\\FrameSep}{\\outerbordwidth}
-          \\begin{shaded}
-      \\setlength{\\fboxsep}{0pt}\\framebox[\\textwidth][l]{\\setlength{\\fboxsep}{4pt}\\fcolorbox{shadecolorB}{shadecolorB}{\\textbf{\\sffamily{\\mbox{~}\\makebox[6.762in][l]{\\large #1} \\vphantom{p\\^{E}}}}}}
-          \\end{shaded}
-        }\\vspace{-11pt}
-      }
-      \\newcommand{\\ressubheading}[4]{
-      \\begin{tabular*}{6.5in}{l@{\\cftdotfill{\\cftsecdotsep}\\extracolsep{\\fill}}r}
-          \\textbf{#1} & #2 \\\\
-          \\textit{#3} & \\textit{#4} \\\\
-
-      \\end{tabular*}\\vspace{-6pt}}
-
-      \\newcommand{\\school}[4]{\\vspace{1.5mm}
-        \\textbf{#1} \\hfill #2 \\textit{#3} \\hfill \\textit{#4} \\vspace{1.5mm}
-      }
-
-      \\newcommand{\\job}[4]{
-        \\textbf{#1} \\hfill #2 \\hfill \\textit{#3} \\hfill \\textit{#4}
-      }
-
-      \\newcommand{\\skill}[2]{
-        \\textbf{#1} #2
-      }
-
-      \\newcommand{\\project}[4]{ \\vspace{1.5mm}
-        \\textbf{#1} #2 \\hfill \\textit{#3}#4 \\vspace{1.5mm}
-      }
-
-      \\newcommand{\\award}[4]{ \\vspace{1.5mm}
-        \\textbf{#1} #2 \\hfill \\textit{#3} #4 \\vspace{1.5mm}
-      }
-      %-----------------------------------------------------------
-    `
-  }
-}
+};
 
 function template3(values: FormValues) {
-  const { headings = {} } = values
+  const { headings } = values;
 
   return stripIndent`
     ${generator.resumeHeader()}
+
     \\begin{document}
+    \\makeheaders[c]
+
     ${values.sections
       .map((section) => {
         switch (section) {
-          case 'profile':
-            return generator.profileSection(values.basics)
+          case 'personal_information':
+            return generator.personalInformationSection(values.personal_information);
+
+          case 'experience':
+            return generator.experienceSection(values.experience, headings.experience);
 
           case 'education':
-            return generator.educationSection(
-              values.education,
-              headings.education
-            )
-
-          case 'work':
-            return generator.workSection(values.work, headings.work)
+            return generator.educationSection(values.education, headings.education);
 
           case 'skills':
-            return generator.skillsSection(values.skills, headings.skills)
-
-          case 'projects':
-            return generator.projectsSection(values.projects, headings.projects)
-
-          case 'awards':
-            return generator.awardsSection(values.awards, headings.awards)
+            return generator.skillsSection(values.skills, headings.skills);
 
           default:
-            return ''
+            return '';
         }
       })
-      .join('\n')}
+      .join('\n\n')}
+
     ${WHITESPACE}
     \\end{document}
-  `
+  `;
 }
 
-export default template3
+export default template3;
