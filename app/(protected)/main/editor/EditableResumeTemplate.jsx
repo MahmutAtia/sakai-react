@@ -59,6 +59,7 @@ const EditableResumeTemplate = ({ resumeId }) => {
         return Array.isArray(data[key]) && data[key].length === 0;
     };
 
+
     const toggleSectionVisibility = (sectionKey) => {
         setHiddenSections((prev) => {
             const newHiddenSections = prev.includes(sectionKey)
@@ -275,6 +276,7 @@ const EditableResumeTemplate = ({ resumeId }) => {
                                                             >
                                                                 {(provided, snapshot) => (
                                                                     <div
+                                                                        onClick={() => toggleSectionVisibility(sectionKey)}
                                                                         ref={provided.innerRef}
                                                                         {...provided.draggableProps}
                                                                         {...provided.dragHandleProps}

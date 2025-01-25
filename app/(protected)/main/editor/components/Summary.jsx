@@ -62,7 +62,9 @@ const Summary = ({ sectionKey }) => {
                 body: JSON.stringify({
                     prompt: aiPrompt,
                     sectionData: summary,
-                    sectionTitle: "Summary",
+                    sectionTitle: sectionKey.split('_').map(word =>
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                    ).join(' ')
                 }),
             });
             const data = await response.json();

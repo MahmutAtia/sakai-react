@@ -136,6 +136,9 @@ const Education = ({ sectionKey }) => {
                     canUndo={historyRef.current.length > 0}
                     onAIUpdate={(updatedData) => handleAIUpdate(index, updatedData)}
                     sectionData={edu}
+                    sectionTitle={sectionKey.split('_').map(word =>
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                    ).join(' ')}
                     editContent={
                         <div className="flex flex-column gap-3">
                             <InputText

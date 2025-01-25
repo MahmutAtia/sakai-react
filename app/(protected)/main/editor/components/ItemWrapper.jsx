@@ -40,6 +40,14 @@ const ItemWrapper = ({
         setIsAIProcessing(false);
     };
 
+    const dialogHeader = (
+        <div className="flex align-items-center justify-content-between p-3 border-bottom-1 surface-border">
+            <h2 className="text-xl font-semibold m-0">
+                Edit {sectionTitle}
+            </h2>
+        </div>
+    );
+
     return (
         <div ref={itemRef} className={`relative scroll-mt-[100px] ${isNewItem ? 'animate-fadeIn' : ''}`}>
             <div className="surface-card p-3 border-1 surface-border border-round shadow-1 hover:shadow-3 transition-shadow">
@@ -67,20 +75,17 @@ const ItemWrapper = ({
                     style={{ width: "min(90vw, 800px)" }}
                     dismissableMask
                     className="resume-editor-dialog"
-                    header={sectionTitle} // Simple header with just the section title
+                    header={dialogHeader}
                 >
                     <div className="flex flex-column h-full">
                         {/* Scrollable Chat-like Edit Section */}
-                        <div className="flex flex-column gap-3 flex-grow-1 overflow-auto p-3 surface-50 border-round">
+                        <div className="flex flex-column gap-3 flex-grow-1 overflow-auto p-3 surface-0 border-round">
                             {/* Edit Content (Messages) */}
                             <div className="flex flex-column gap-3">
                                 {editContent}
                             </div>
 
-                            {/* AI Suggestions (Messages) */}
-                            <div className="flex flex-column gap-3">
-                                {/* AI suggestions will dynamically appear here when available */}
-                            </div>
+
                         </div>
 
                         {/* Sticky AI Assistant and Undo Button at the Bottom */}
