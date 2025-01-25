@@ -64,13 +64,13 @@ const ItemWrapper = ({
                 <Dialog
                     visible={isEditing}
                     onHide={onEdit}
-                    style={{ width: 'min(90vw, 800px)' }}
+                    style={{ width: "min(90vw, 800px)" }}
                     dismissableMask
                     className="resume-editor-dialog"
                     header={sectionTitle} // Simple header with just the section title
                 >
-                    <div className="flex flex-column gap-4 h-full">
-                        {/* Chat-like Edit Section */}
+                    <div className="flex flex-column h-full">
+                        {/* Scrollable Chat-like Edit Section */}
                         <div className="flex flex-column gap-3 flex-grow-1 overflow-auto p-3 surface-50 border-round">
                             {/* Edit Content (Messages) */}
                             <div className="flex flex-column gap-3">
@@ -83,9 +83,9 @@ const ItemWrapper = ({
                             </div>
                         </div>
 
-                        {/* AI Assistant and Undo Button at the Bottom */}
-                        <div className="border-top-1 surface-border pt-3">
-                            <div className="flex align-items-center justify-content-between gap-2">
+                        {/* Sticky AI Assistant and Undo Button at the Bottom */}
+                        <div className="sticky bottom-0 bg-surface-0 border-top-1 surface-border pt-3">
+                            <div className="flex align-items-center justify-content-between gap-2 p-3">
                                 <div className="flex-grow-1">
                                     <AIAssistant
                                         prompt={aiPrompt}
@@ -94,12 +94,17 @@ const ItemWrapper = ({
                                         isProcessing={isAIProcessing}
                                     />
                                 </div>
-                                <UndoButton onUndo={onUndo} disabled={!canUndo} />
+                                <Button
+                                    icon="pi pi-undo"
+                                    className="p-button-rounded p-button-text"
+                                    onClick={onUndo}
+                                    disabled={!canUndo}
+                                    tooltip="Undo"
+                                />
                             </div>
                         </div>
                     </div>
                 </Dialog>
-
                 <ConfirmDialog
                     visible={showDeleteDialog}
                     onHide={() => setShowDeleteDialog(false)}
