@@ -15,12 +15,14 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import 'primeflex/primeflex.css';
 import styles from './EditableResumeTemplate.module.css';
 import { Toast } from 'primereact/toast';
+import { useRouter } from 'next/navigation';
 
 const EditableResumeTemplate = ({ resumeId }) => {
     const { data } = useResume();
     const [loading, setLoading] = useState(false);
     const [hiddenSections, setHiddenSections] = useState([]);
     const [sidebarVisible, setSidebarVisible] = useState(false);
+    const router = useRouter();
     const NON_ARRAY_SECTIONS = ['personal_information', 'summary', 'objective'];
     const toast = useRef(null);
     const [sectionOrder, setSectionOrder] = useState([
@@ -219,7 +221,7 @@ const EditableResumeTemplate = ({ resumeId }) => {
                         icon="pi pi-download"
                         label="Export"
                         className="p-button-outlined"
-                        onClick={() => router.push(`/main/template2/${params.id}`)}
+                        onClick={() => router.push(`/${resumeId}`)}
                     />
                     <Button
                         icon="pi pi-save"

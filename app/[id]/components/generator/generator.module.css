@@ -1,0 +1,17 @@
+.output {
+    grid-area: preview;
+    background: var(--light-black);
+    overflow-y: auto;
+  }
+
+  .resumePage {
+    padding: 1.5em 0 10rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .resumePage canvas {
+    max-width: 95% !important;
+    height: auto !important;
+  }

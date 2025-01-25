@@ -9,18 +9,13 @@ import { FormValues } from '../../../../types'
 
 import latex from '../../../../../lib/latex'
 import getTemplateData from '../../../../../lib/templates'
-import { PrimaryButton } from '../../core/Button'
-import { watch } from 'fs'
+
 
 async function generateResume(formData: FormValues): Promise<string> {
     const { texDoc, opts } = getTemplateData(formData)
     return latex(texDoc, opts)
 }
 
-const StyledForm = styled.form`
-  grid-area: form;
-  overflow: auto;
-`
 
 const initialFormValues: FormValues = {
     headings: {},
@@ -148,9 +143,7 @@ export function Form({ resumeId }) {
     return (
 
         <>
-            <PrimaryButton form="resume-form" onClick={handleFormSubmit}>
-                Generate
-            </PrimaryButton>
+
         </>
 
     )

@@ -14,11 +14,11 @@ const Preview = dynamic(
 
 const Main = styled.main`
   display: grid;
-  grid-template-columns: 0.3fr 0.7fr 1fr;
+  grid-template-columns: 0.1fr  1fr;
   grid-template-rows: auto 1fr;
   grid-template-areas:
-    'header header header'
-    'sidebar form preview';
+    'header  header'
+    'sidebar preview';
   height: 100vh;
 `
 
