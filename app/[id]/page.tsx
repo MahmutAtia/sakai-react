@@ -14,12 +14,13 @@ const Preview = dynamic(
 
 const Main = styled.main`
   display: grid;
-  grid-template-columns: 0.1fr  1fr;
+  grid-template-columns: 0.7fr  1fr;
   grid-template-rows: auto 1fr;
   grid-template-areas:
     'header  header'
     'sidebar preview';
   height: 100vh;
+  overflow: hidden;
 `
 
 export default function GeneratorPage() {
@@ -28,8 +29,7 @@ export default function GeneratorPage() {
   return (
     <Main>
       <Header />
-      <Sidebar />
-      <Form resumeId={resumeId} />
+      <Sidebar resumeId={resumeId} />
       <Preview />
     </Main>
   )

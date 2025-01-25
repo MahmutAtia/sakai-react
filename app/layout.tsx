@@ -8,6 +8,7 @@ import 'primeicons/primeicons.css';
 import '../styles/layout/layout.scss';
 import '../styles/demo/Demos.scss';
 import AuthProvider from './providers/AuthProvider';
+import ServiceWorker from './components/ServiceWorker';
 interface RootLayoutProps {
     children: React.ReactNode;
 }
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                     <LayoutProvider>{children}</LayoutProvider>
                 </PrimeReactProvider>
                 </AuthProvider>
+                <ServiceWorker />
             </body>
         </html>
     );

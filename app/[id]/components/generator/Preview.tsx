@@ -30,10 +30,10 @@ const ResumePage = styled(Page)`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1.5em 0 10rem 0;
+  padding: 1rem 0 10rem 0;
 
   canvas {
-    max-width: 95% !important;
+    max-width: 100% !important;
     height: auto !important;
   }
 `
@@ -48,22 +48,37 @@ export function Preview() {
         setPageCount(pdf.numPages)
     }, [])
 
+    const downloadSource = () => {
+        window.open(resume.url)
+    }
+
+    const print = () => {
+        window.print()
+    }
+
+    const zoomIn = () => {
+        setScale(scale + 0.25)
+    }
+
+    const zoomOut = () => {
+        setScale(scale - 0.25)
+    }
+
     return (
         <Output>
             <button onClick={() => window.open(resume.url)}>export as pdf</button>
             <PdfContainer>
-                {/* <Toolbar
-          resumeURL={resumeURL || BlankPDF}
-          jsonURL={jsonURL}
-          downloadSource={downloadSource}
-          currPage={pageNumber}
-          prevPage={ pageNumber > 1 ? pageNumber - 1 : 1 }
-          nextPage={ pageNumber < pageCount ? pageNumber + 1 : pageCount }
-          print={print}
-          zoomIn={zoomIn}
-          zoomOut={zoomOut}
-        />
-        <LoadingBar status={status} /> */}
+                <Toolbar
+                    resumeURL={resume.url || '/blank.pdf'}
+                    downloadSource={resume.url}
+                    currPage={pageNumber}
+                    prevPage={pageNumber > 1 ? pageNumber - 1 : 1}
+                    nextPage={pageNumber < pageCount ? pageNumber + 1 : pageCount}
+                    print={print}
+                    zoomIn={zoomIn}
+                    zoomOut={zoomOut}
+                />
+                <LoadingBar status={status} />
 
                 <ResumeDocument
                     file={resume.url || '/blank.pdf'}
@@ -83,4 +98,99 @@ export function Preview() {
     )
 }
 
+
+
+
+
+import React from 'react';
+import { Button } from 'primereact/button';
+
+interface ToolbarProps {
+    resumeURL: string;
+    downloadSource: () => void;
+    currPage: number;
+    prevPage: number;
+    nextPage: number;
+    print: () => void;
+    zoomIn: () => void;
+    zoomOut: () => void;
+}
+
+const Toolbar: React.FC<ToolbarProps> = ({
+    resumeURL,
+    downloadSource,
+    currPage,
+    prevPage,
+    nextPage,
+    print,
+    zoomIn,
+    zoomOut
+}) => {
+    return (
+        <div className="flex items-center justify-between p-4 bg-gray-100 border-b">
+            <div className="flex gap-2">
+                <Button
+                    icon="pi pi-download"
+                    onClick={downloadSource}
+                    tooltip="Download PDF"
+                    className="p-button-rounded p-button-text"
+                />
+                <Button
+                    icon="pi pi-print"
+                    onClick={print}
+                    tooltip="Print"
+                    className="p-button-rounded p-button-text"
+                />
+            </div>
+
+            <div className="flex items-center gap-2">
+                <Button
+                    icon="pi pi-angle-left"
+                    onClick={() => currPage !== prevPage && prevPage}
+                    disabled={currPage === 1}
+                    className="p-button-rounded p-button-text"
+                />
+                <span className="font-medium">Page {currPage}</span>
+                <Button
+                    icon="pi pi-angle-right"
+                    onClick={() => currPage !== nextPage && nextPage}
+                    disabled={currPage === nextPage}
+                    className="p-button-rounded p-button-text"
+                />
+            </div>
+
+            <div className="flex gap-2">
+                <Button
+                    icon="pi pi-minus"
+                    onClick={zoomOut}
+                    tooltip="Zoom Out"
+                    className="p-button-rounded p-button-text"
+                />
+                <Button
+                    icon="pi pi-plus"
+                    onClick={zoomIn}
+                    tooltip="Zoom In"
+                    className="p-button-rounded p-button-text"
+                />
+            </div>
+        </div>
+    );
+};
+
+
+
+
+interface LoadingBarProps {
+    status: string;
+}
+
+const LoadingBar: React.FC<LoadingBarProps> = ({ status }) => {
+    return (
+        <div className="h-1 bg-gray-200">
+            {status === 'loading' && (
+                <div className="h-full w-full bg-blue-500 animate-pulse"></div>
+            )}
+        </div>
+    );
+};
 
