@@ -46,7 +46,7 @@ const initialFormValues: FormValues = {
     selectedTemplate: 1,
 };
 
-export function Form({ resumeId }) {
+export function Form({  }) {
 
     const [resume, setResume] = useAtom(resumeAtom)
     const formContext = useForm<FormValues>({ defaultValues: { ...initialFormValues, selectedTemplate: 1 } })

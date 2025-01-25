@@ -148,6 +148,7 @@ export function Sidebar({resumeId}) {
     }, [formContext, resume, setResume])
 
 
+
     // TODO: move this to a custom react hook
     useEffect(() => {
         const loadInitialData = async () => {
@@ -202,6 +203,12 @@ export function Sidebar({resumeId}) {
 
     }, [resumeId, formContext])
 
+
+    useEffect(() => {
+        if (!initialLoad.current) {
+            handleFormSubmit()
+        }
+    }, [selectedTemplate])
 
     return (
         <FormProvider {...formContext}>
