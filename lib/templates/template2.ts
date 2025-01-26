@@ -1,328 +1,194 @@
 import { stripIndent, source } from 'common-tags';
 import { WHITESPACE } from './constants';
-import type { FormValues, Generator } from '../../types';
+import { FormValues, Generator } from '../../types';
 
-// Utility function to escape LaTeX special characters
 function escapeLatex(text) {
-  if (!text) return text;
+    if (typeof text !== 'string') {
+        return text; // Return the input as-is if it's not a string
+    }
 
-  return text
-    .replace(/\\/g, '\\textbackslash')
-    .replace(/&/g, '\\&')
-    .replace(/%/g, '\\%')
-    .replace(/\$/g, '\\$')
-    .replace(/#/g, '\\#')
-    .replace(/_/g, '\\_')
-    .replace(/{/g, '\\{')
-    .replace(/}/g, '\\}')
-    .replace(/~/g, '\\textasciitilde')
-    .replace(/\^/g, '\\textasciicircum');
+    // Escape special LaTeX characters
+    return text
+        .replace(/\\/g, '\\textbackslash') // Escape backslashes first
+        .replace(/&/g, '\\&')
+        .replace(/%/g, '\\%')
+        .replace(/\$/g, '\\$')
+        .replace(/#/g, '\\#')
+        .replace(/_/g, '\\_')
+        .replace(/{/g, '\\{')
+        .replace(/}/g, '\\}')
+        .replace(/~/g, '\\textasciitilde')
+        .replace(/\^/g, '\\textasciicircum');
 }
 
 const generator: Generator = {
-  // Resume header with configuration
-  resumeHeader() {
-    return stripIndent`
-      %!TEX TS-program = xelatex
-      %!TEX encoding = UTF-8 Unicode
-      % Awesome CV LaTeX Template
-      %
-      % This template has been downloaded from:
-      % https://github.com/posquit0/Awesome-CV
-      %
-      % Author:
-      % Claud D. Park <posquit0.bj@gmail.com>
-      % http://www.posquit0.com
-      %
-      % Template license:
-      % CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
+    resumeHeader() {
+        return stripIndent`
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Template 2: A mashup of hipstercv, friggeri, and twenty cv
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            \\documentclass[lighthipster]{simplehipstercv}
+            \\usepackage[utf8]{inputenc}
+            \\usepackage[default]{raleway}
+            \\usepackage[margin=1cm, a4paper]{geometry}
+            \\usepackage{tabularx}
 
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      %     Configuration
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      %%% Themes: Awesome-CV
-      \\documentclass[]{awesome-cv}
-      \\usepackage{textcomp}
-      %%% Override a directory location for fonts(default: 'fonts/')
-      \\fontdir[fonts/]
+            \\newlength{\\rightcolwidth}
+            \\newlength{\\leftcolwidth}
+            \\setlength{\\leftcolwidth}{0.23\\textwidth}
+            \\setlength{\\rightcolwidth}{0.75\\textwidth}
 
-      %%% Configure a directory location for sections
-      \\newcommand*{\\sectiondir}{resume/}
+            \\pagestyle{empty}
+        `;
+    },
 
-      %%% Override color
-      \\colorlet{awesome}{awesome-red}
-    `;
-  },
-
-  // Profile section
-  profileSection(basics) {
-    if (!basics) {
-      return '';
-    }
-
-    const { name, email, phone, location = {}, website } = basics;
-
-    let nameLine = '';
-
-    if (name) {
-      const names = name.split(' ');
-      let nameStart = '';
-      let nameEnd = '';
-
-      if (names.length === 1) {
-        nameStart = names[0];
-      } else {
-        nameStart = names[0];
-        nameEnd = names.slice(1, names.length).join(' ');
-      }
-
-      nameLine = `\\headerfirstnamestyle{${escapeLatex(nameStart)}} \\headerlastnamestyle{${escapeLatex(nameEnd)}} \\\\`;
-    }
-
-    const emailLine = email ? `{\\faEnvelope\\ ${escapeLatex(email)}}` : '';
-    const phoneLine = phone ? `{\\faMobile\\ ${escapeLatex(phone)}}` : '';
-    const addressLine = location.address
-      ? `{\\faMapMarker\\ ${escapeLatex(location.address)}}`
-      : '';
-    const websiteLine = website
-      ? `{\\faLink\\ \\href{${escapeLatex(website)}}{${escapeLatex(website)}}}`
-      : '';
-    const info = [emailLine, phoneLine, addressLine, websiteLine]
-      .filter(Boolean)
-      .join(' | ');
-
-    return stripIndent`
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      %     Profile
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\begin{center}
-        ${nameLine}
-        \\vspace{2mm}
-        ${info}
-      \\end{center}
-    `;
-  },
-
-  // Education section
-  educationSection(education, heading) {
-    if (!education) {
-      return '';
-    }
-
-    return source`
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      %     Education
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\cvsection{${escapeLatex(heading || 'Education')}}
-      \\begin{cventries}
-      ${education.map((school) => {
-        const {
-          institution,
-          location,
-          area,
-          studyType,
-          score,
-          startDate,
-          endDate,
-        } = school;
-
-        let degreeLine = '';
-
-        if (studyType && area) {
-          degreeLine = `${escapeLatex(studyType)} in ${escapeLatex(area)}`;
-        } else if (studyType || area) {
-          degreeLine = escapeLatex(studyType || area);
+    personalInformationSection(personalInformation) {
+        if (!personalInformation) {
+            return '';
         }
 
-        let dateRange = '';
+        const { name, email, phone, location, profiles } = personalInformation;
+        const { linkedin, github, website, portfolio } = profiles || {};
 
-        if (startDate && endDate) {
-          dateRange = `${escapeLatex(startDate)} – ${escapeLatex(endDate)}`;
-        } else if (startDate) {
-          dateRange = `${escapeLatex(startDate)} – Present`;
-        } else {
-          dateRange = escapeLatex(endDate);
+        const address = location?.address || '';
+        const city = location?.city || '';
+        const state = location?.state || '';
+        const postalCode = location?.postal_code || '';
+
+        const locationLine = [address, city, state, postalCode]
+            .filter(Boolean)
+            .map(escapeLatex)
+            .join(', ');
+
+        const profileLines = [
+            linkedin ? `\\href{${escapeLatex(linkedin)}}{LinkedIn}` : '',
+            github ? `\\href{${escapeLatex(github)}}{GitHub}` : '',
+            website ? `\\href{${escapeLatex(website)}}{Website}` : '',
+            portfolio ? `\\href{${escapeLatex(portfolio)}}{Portfolio}` : '',
+        ]
+            .filter(Boolean)
+            .join(' | ');
+
+        return stripIndent`
+            \\begin{document}
+            \\thispagestyle{empty}
+            \\section*{Start}
+            \\simpleheader{headercolour}{${escapeLatex(name)}}{}{${escapeLatex(locationLine)}}{white}
+
+            \\subsection*{}
+            \\vspace{4em}
+
+            \\setlength{\\columnsep}{1.5cm}
+            \\columnratio{0.23}[0.75]
+            \\begin{paracol}{2}
+            \\hbadness5000
+
+            \\footnotesize
+            {\\setasidefontcolour
+            \\flushright
+
+            \\bg{cvgreen}{white}{About me}\\\\[0.5em]
+            {\\footnotesize
+            ${escapeLatex(personalInformation.summary || '')}}
+            \\bigskip
+
+            \\bg{cvgreen}{white}{Personal} \\\\[0.5em]
+            ${escapeLatex(name)} \\\\
+            ${escapeLatex(locationLine)} \\\\
+            ${escapeLatex(email)} \\\\
+            ${escapeLatex(phone)} \\\\
+            ${profileLines}
+            \\bigskip
+            }
+        `;
+    },
+
+    experienceSection(experience, heading) {
+        if (!experience) {
+            return '';
         }
 
-        return stripIndent`
-          \\cventry
-            {${degreeLine}}
-            {${escapeLatex(institution || '')}}
-            {${escapeLatex(location || '')}}
-            {${dateRange}}
-            {${score ? `GPA: ${escapeLatex(score)}` : ''}}
+        return source`
+            \\switchcolumn
+            \\small
+            \\section*{${escapeLatex(heading || 'Experience')}}
+            \\begin{tabularx}{\\rightcolwidth}{r| X c}
+                ${experience.map((job) => {
+                    const { company, title, location, start_date, end_date, description } = job;
+
+                    const dateRange = start_date && end_date ? `${escapeLatex(start_date)}--${escapeLatex(end_date)}` : escapeLatex(start_date);
+
+                    return stripIndent`
+                        \\cvevent{${dateRange}}{${escapeLatex(title)}}{${escapeLatex(company)}}{${escapeLatex(location)}}{${escapeLatex(description)}}{}
+                    `;
+                }).join('')}
+            \\end{tabularx}
+            \\vspace{3em}
         `;
-      })}
-      \\end{cventries}
+    },
 
-      \\vspace{-2mm}
-    `;
-  },
-
-  // Work experience section
-  workSection(work, heading) {
-    if (!work) {
-      return '';
-    }
-
-    return source`
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      %     Experience
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \\cvsection{${escapeLatex(heading || 'Experience')}}
-      \\begin{cventries}
-      ${work.map((job) => {
-        const { name, position, location, startDate, endDate, highlights } = job;
-
-        let dateRange = '';
-        let dutyLines = '';
-
-        if (startDate && endDate) {
-          dateRange = `${escapeLatex(startDate)} – ${escapeLatex(endDate)}`;
-        } else if (startDate) {
-          dateRange = `${escapeLatex(startDate)} – Present`;
-        } else {
-          dateRange = escapeLatex(endDate);
+    educationSection(education, heading) {
+        if (!education) {
+            return '';
         }
 
-        if (highlights) {
-          dutyLines = source`
-            \\begin{cvitems}
-              ${highlights.map((duty) => `\\item {${escapeLatex(duty)}}`)}
-            \\end{cvitems}
-          `;
+        return source`
+            \\begin{minipage}[t]{0.35\\textwidth}
+            \\section*{${escapeLatex(heading || 'Education')}}
+            \\begin{tabularx}{\\rightcolwidth}{r X c}
+                ${education.map((school) => {
+                    const { institution, degree, major, minor, gpa, graduation_date } = school;
+
+                    return stripIndent`
+                        \\cvdegree{${escapeLatex(graduation_date)}}{${escapeLatex(degree)}}{${escapeLatex(major)}}{${escapeLatex(institution)}}{${escapeLatex(gpa)}}{}
+                    `;
+                }).join('')}
+            \\end{tabularx}
+            \\end{minipage}
+        `;
+    },
+
+    finalFooter(personalInformation) {
+        if (!personalInformation) {
+            return '';
         }
 
-        return stripIndent`
-          \\cventry
-            {${escapeLatex(position || '')}}
-            {${escapeLatex(name || '')}}
-            {${escapeLatex(location || '')}}
-            {${dateRange}}
-            {${dutyLines}}
-        `;
-      })}
-      \\end{cventries}
-    `;
-  },
+        const { name, email, phone, location } = personalInformation;
+        const address = location?.address || '';
+        const city = location?.city || '';
+        const state = location?.state || '';
+        const postalCode = location?.postal_code || '';
 
-  // Skills section
-  skillsSection(skills, heading) {
-    if (!skills) {
-      return '';
-    }
-
-    return source`
-      \\cvsection{${escapeLatex(heading || 'Skills')}}
-      \\begin{cventries}
-      \\cventry
-      {}
-      {\\def\\arraystretch{1.15}{\\begin{tabular}{ l l }
-      ${skills.map((skill) => {
-        const { name, keywords = [] } = skill;
-        const nameLine = name ? `${escapeLatex(name)}: ` : '';
-        const detailsLine = `{\\skill{ ${keywords.map(escapeLatex).join(', ') || ''}}}`;
-
-        return `${nameLine} & ${detailsLine} \\\\`;
-      })}
-      \\end{tabular}}}
-      {}
-      {}
-      {}
-      \\end{cventries}
-
-      \\vspace{-7mm}
-    `;
-  },
-
-  // Projects section
-  projectsSection(projects, heading) {
-    if (!projects) {
-      return '';
-    }
-
-    return source`
-      \\cvsection{${escapeLatex(heading || 'Projects')}}
-      \\begin{cventries}
-      ${projects.map((project) => {
-        const { name, description, keywords = [], url } = project;
-        const urlLine = url ? `\\href{${escapeLatex(url)}}{${escapeLatex(url)}}` : '';
+        const locationLine = [address, city, state, postalCode]
+            .filter(Boolean)
+            .map(escapeLatex)
+            .join(', ');
 
         return stripIndent`
-          \\cventry
-            {${escapeLatex(description || '')}}
-            {${escapeLatex(name || '')}}
-            {${keywords.map(escapeLatex).join(', ') || ''}}
-            {${urlLine}}
-            {}
+            \\vfill{}
+            \\setlength{\\parindent}{0pt}
+            \\begin{minipage}[t]{\\rightcolwidth}
+            \\begin{center}\\fontfamily{\\sfdefault}\\selectfont \\color{black!70}
+            {\\small ${escapeLatex(name)} \\icon{\\faEnvelopeO}{cvgreen}{} ${escapeLatex(locationLine)} \\icon{\\faMapMarker}{cvgreen}{} ${escapeLatex(email)} \\icon{\\faPhone}{cvgreen}{} ${escapeLatex(phone)}}
+            \\end{center}
+            \\end{minipage}
 
-          \\vspace{-5mm}
+            \\end{paracol}
+            \\end{document}
         `;
-      })}
-      \\end{cventries}
-    `;
-  },
-
-  // Awards section
-  awardsSection(awards, heading) {
-    if (!awards) {
-      return '';
-    }
-
-    return source`
-      \\cvsection{${escapeLatex(heading || 'Awards')}}
-      \\begin{cvhonors}
-      ${awards.map((award) => {
-        const { title, summary, date, awarder } = award;
-
-        return stripIndent`
-          \\cvhonor
-            {${escapeLatex(title || '')}}
-            {${escapeLatex(summary || '')}}
-            {${escapeLatex(awarder || '')}}
-            {${escapeLatex(date || '')}}
-        `;
-      })}
-      \\end{cvhonors}
-    `;
-  },
+    },
 };
 
 function template2(values: FormValues) {
-  const { headings = {} } = values;
+    const { headings = {} } = values;
 
-  return stripIndent`
-    ${generator.resumeHeader()}
-    \\begin{document}
-    ${values.sections
-      .map((section) => {
-        switch (section) {
-          case 'profile':
-            return generator.profileSection(values.basics);
-
-          case 'education':
-            return generator.educationSection(values.education, headings.education);
-
-          case 'work':
-            return generator.workSection(values.work, headings.work);
-
-          case 'skills':
-            return generator.skillsSection(values.skills, headings.skills);
-
-          case 'projects':
-            return generator.projectsSection(values.projects, headings.projects);
-
-          case 'awards':
-            return generator.awardsSection(values.awards, headings.awards);
-
-          default:
-            return '';
-        }
-      })
-      .join('\n')}
-    ${WHITESPACE}
-    \\end{document}
-  `;
+    return stripIndent`
+        ${generator.resumeHeader()}
+        ${generator.personalInformationSection(values.personal_information)}
+        ${generator.experienceSection(values.experience, headings.experience)}
+        ${generator.educationSection(values.education, headings.education)}
+        ${generator.finalFooter(values.personal_information)}
+    `;
 }
 
 export default template2;

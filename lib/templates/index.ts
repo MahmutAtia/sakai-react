@@ -45,7 +45,11 @@ export default function getTemplateData(data: FormValues): TemplateData {
           cmd: 'xelatex',
           inputs: [
             '/templates/template2/awesome-cv.cls',
-            '/templates/template2/fontawesome.sty'
+            '/templates/template2/fontawesome.sty',
+            '/templates/template2/simplehipstercv.cls',
+            '/templates/template2/simplehipstercv.sty',
+            '/templates/template2/jack.jpg'
+
           ],
           fonts: [
             '/templates/template2/fonts/FontAwesome.otf',

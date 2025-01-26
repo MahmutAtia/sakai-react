@@ -2,248 +2,147 @@ import { stripIndent, source } from 'common-tags';
 import { WHITESPACE } from './constants';
 import { FormValues, Generator } from '../../types';
 
-// Utility function to escape LaTeX special characters
-function escapeLatex(text) {
-    if (typeof text !== 'string') {
-      return text; // Return the input as-is if it's not a string
-    }
-
-    // Escape special LaTeX characters
-    return text
-      .replace(/\\/g, '\\textbackslash') // Escape backslashes first
-      .replace(/&/g, '\\&')
-      .replace(/%/g, '\\%')
-      .replace(/\$/g, '\\$')
-      .replace(/#/g, '\\#')
-      .replace(/_/g, '\\_')
-      .replace(/{/g, '\\{')
-      .replace(/}/g, '\\}')
-      .replace(/~/g, '\\textasciitilde')
-      .replace(/\^/g, '\\textasciicircum');
-  }
 
 
 const generator: Generator = {
-  resumeHeader() {
-    return stripIndent`
-      % This CV example/template is based on a clean design
-      % Adapted for use with modern LaTeX packages
-      \\documentclass[a4paper,skipsamekey,11pt,english]{curve}
+    // Utility function to escape LaTeX special characters
+    escapeLatex(text) {
+        if (typeof text !== 'string') {
+            return text; // Return the input as-is if it's not a string
+          }      return text
+        .replace(/\\/g, '\\textbackslash')
+        .replace(/&/g, '\\&')
+        .replace(/%/g, '\\%')
+        .replace(/\$/g, '\\$')
+        .replace(/#/g, '\\#')
+        .replace(/_/g, '\\_')
+        .replace(/{/g, '\\{')
+        .replace(/}/g, '\\}')
+        .replace(/~/g, '\\textasciitilde')
+        .replace(/\^/g, '\\textasciicircum');
+    },
 
-      % Load settings and customisations
-      \\usepackage{./public/settings}
-
-      % Define bibliography style
-      \\PassOptionsToPackage{style=ieee,sorting=ydnt,uniquename=init,defernumbers=true}{biblatex}
-
-      % Load fonts
-      \\ifxetexorluatex
-        \\usepackage{fontspec}
-        \\usepackage[p,osf,swashQ]{cochineal}
-        \\usepackage[medium,bold]{cabin}
-        \\usepackage[varqu,varl,scale=0.9]{zi4}
-      \\else
-        \\usepackage[T1]{fontenc}
-        \\usepackage[p,osf,swashQ]{cochineal}
-        \\usepackage{cabin}
-        \\usepackage[varqu,varl,scale=0.9]{zi4}
-      \\fi
-
-      % Define colours and markers
-      % \\definecolor{SwishLineColour}{HTML}{00FFFF}
-      % \\definecolor{MarkerColour}{HTML}{0000CC}
-      % \\prefixmarker{\\$diamond$}
-
-      % Include fullonly for photo
-      \\includecomment{fullonly}
-    `;
-  },
-
-  personalInformationSection(personalInformation) {
-    if (!personalInformation) {
-      return '';
-    }
-
-    const { name, email, phone, location, profiles } = personalInformation;
-    const { linkedin, github, website, portfolio } = profiles || {};
-
-    const address = location?.address || '';
-    const city = location?.city || '';
-    const state = location?.state || '';
-    const postalCode = location?.postal_code || '';
-
-    const locationLine = [address, city, state, postalCode]
-      .filter(Boolean)
-      .map(escapeLatex)
-      .join(', ');
-
-    const profileLines = [
-      linkedin ? `\\href{${escapeLatex(linkedin)}}{LinkedIn}` : '',
-      github ? `\\href{${escapeLatex(github)}}{GitHub}` : '',
-      website ? `\\href{${escapeLatex(website)}}{Website}` : '',
-      portfolio ? `\\href{${escapeLatex(portfolio)}}{Portfolio}` : '',
-    ]
-      .filter(Boolean)
-      .join(' $\\cdot$ ');
-
-    return stripIndent`
-      %==== Personal Information ====%
-      \\leftheader{%
-        {\\LARGE\\bfseries\\sffamily ${escapeLatex(name)}}
-
-        \\makefield{\\faEnvelope[regular]}{\\href{mailto:${escapeLatex(email)}}{\\texttt{${escapeLatex(email)}}}}
-        \\makefield{\\faLinkedin}{\\href{${escapeLatex(linkedin)}}{\\texttt{${escapeLatex(linkedin)}}}}
-        \\makefield{\\faGlobe}{\\url{${escapeLatex(website)}}}
-
-        ${locationLine ? `\\makefield{\\faMapMarker}{${escapeLatex(locationLine)}}` : ''}
-        ${phone ? `\\makefield{\\faPhone}{${escapeLatex(phone)}}` : ''}
+    // Personal Information Section
+    personalInformationSection(personalInformation) {
+      if (!personalInformation) {
+        return '';
       }
 
-      \\rightheader{~}
-      \\begin{fullonly}
-        \\photo[r]{public/template2/img/photo}
-        \\photoscale{0.13}
-      \\end{fullonly}
+      const { name, email, phone, location, profiles } = personalInformation;
+      const { linkedin, github, website, portfolio } = profiles || {};
 
-      \\title{Curriculum Vitae}
-    `;
-  },
+      const address = location?.address || '';
+      const city = location?.city || '';
+      const state = location?.state || '';
+      const postalCode = location?.postal_code || '';
 
-  experienceSection(experience, heading) {
-    if (!experience) {
-      return '';
-    }
+      const locationLine = [address, city, state, postalCode]
+        .filter(Boolean)
+        .map(this.escapeLatex)
+        .join(', ');
 
-    return source`
-      %==== Experience ====%
-      \\makerubric{${escapeLatex(heading || 'employment')}}
-      ${experience.map((job) => {
-        const { company, title, location, start_date, end_date, description, technologies } = job;
+      const profileLines = [
+        linkedin ? `\\href{${this.escapeLatex(linkedin)}}{LinkedIn}` : '',
+        github ? `\\href{${this.escapeLatex(github)}}{GitHub}` : '',
+        website ? `\\href{${this.escapeLatex(website)}}{Website}` : '',
+        portfolio ? `\\href{${this.escapeLatex(portfolio)}}{Portfolio}` : '',
+      ]
+        .filter(Boolean)
+        .join(' $\\cdot$ ');
 
-        let line1 = `\\textbf{${escapeLatex(company)}}`;
-        if (location) {
-          line1 += ` \\hfill ${escapeLatex(location)}`;
-        }
+      let line1 = name ? `{\\Huge \\scshape {${this.escapeLatex(name)}}}` : '';
+      let line2 = [locationLine, this.escapeLatex(email), this.escapeLatex(phone), profileLines]
+        .filter(Boolean)
+        .join(' $\\cdot$ ');
 
-        let line2 = `\\textit{${escapeLatex(title)}}`;
-        if (start_date && end_date) {
-          line2 += ` \\hfill ${escapeLatex(start_date)} - ${escapeLatex(end_date)}`;
-        } else if (start_date) {
-          line2 += ` \\hfill ${escapeLatex(start_date)} - Present`;
-        }
+      if (line1 && line2) {
+        line1 += '\\\\';
+        line2 += '\\\\';
+      }
 
-        let descriptionLines = '';
-        if (description) {
-          descriptionLines = `\\begin{itemize} \\itemsep 1pt \\item ${escapeLatex(description)} \\end{itemize}`;
-        }
+      return stripIndent`
+        %==== Personal Information ====%
+        \\vspace*{-10pt}
+        \\begin{center}
+          ${line1}
+          ${line2}
+        \\end{center}
+      `;
+    },
 
-        if (technologies && technologies.length > 0) {
-          descriptionLines += `\\textbf{Technologies:} ${technologies.map(escapeLatex).join(', ')}`;
-        }
+    // Skills Section
+    skillsSection(skills, heading) {
+      if (!skills) {
+        return '';
+      }
 
-        return stripIndent`
-          ${line1} \\\\
-          ${line2} \\\\
-          ${descriptionLines}
-          \\vspace*{2mm}
-        `;
-      })}
-    `;
-  },
+      return source`
+        %==== Skills ====%
+        \\header{${this.escapeLatex(heading || 'Skills')}}
+        \\begin{tabularx}{\\textwidth}{ l X }
+        ${skills.map((skill) => {
+          const { name = 'Misc', keywords = [] } = skill;
 
-  educationSection(education, heading) {
-    if (!education) {
-      return '';
-    }
+          // Escape special characters in keywords
+          const escapedKeywords = keywords
+            .map((keyword) => this.escapeLatex(keyword))
+            .join(', ');
 
-    return source`
-      %==== Education ====%
-      \\makerubric{${escapeLatex(heading || 'education')}}
-      ${education.map((school) => {
-        const { institution, degree, major, minor, gpa, graduation_date, relevant_courses } = school;
+          return `${this.escapeLatex(name)}: & ${escapedKeywords} \\\\`;
+        })}
+        \\end{tabularx}
+        \\vspace{2mm}
+      `;
+    },
+  };
 
-        let line1 = `\\textbf{${escapeLatex(institution)}}`;
-        let line2 = `${escapeLatex(degree)}`;
-        if (major) {
-          line2 += ` in ${escapeLatex(major)}`;
-        }
-        if (minor) {
-          line2 += `, Minor in ${escapeLatex(minor)}`;
-        }
-        if (gpa) {
-          line2 += ` \\textit{GPA: ${escapeLatex(gpa)}}`;
-        }
-        if (graduation_date) {
-          line2 += ` \\hfill ${escapeLatex(graduation_date)}`;
-        }
 
-        let coursesLine = '';
-        if (relevant_courses && relevant_courses.length > 0) {
-          coursesLine = `\\textbf{Relevant Courses:} ${relevant_courses.map(escapeLatex).join(', ')}`;
-        }
+  function template3(values) {
+    const { headings } = values;
 
-        return stripIndent`
-          ${line1} \\\\
-          ${line2} \\\\
-          ${coursesLine}
-          \\vspace*{2mm}
-        `;
-      })}
-    `;
-  },
+    return stripIndent`
+      \\documentclass{article}
+      \\usepackage[utf8]{inputenc}
+      \\usepackage[default]{raleway}
+      \\usepackage[margin=1cm, a4paper]{geometry}
+      \\usepackage{xcolor}
+      \\usepackage{paracol}
+      \\usepackage{hyperref}
+      \\usepackage{fontawesome}
 
-  skillsSection(skills, heading) {
-    if (!skills) {
-      return '';
-    }
+      % Define custom colors
+      \\definecolor{headercolour}{rgb}{0.25,0.25,0.25}
+      \\definecolor{cvgreen}{HTML}{4CAF50}
+      \\definecolor{cvpurple}{HTML}{B32EE1}
+      \\definecolor{skilllabelcolour}{HTML}{b3b3b3}
 
-    return source`
+      % Define custom commands
+      \\newcommand{\\header}[1]{
+        {\\hspace*{-18pt}\\vspace*{6pt} \\textsc{#1}}
+        \\vspace*{-6pt} \\hrulefill
+      }
+
+      \\newcommand{\\bg}[3]{
+        \\colorbox{#1}{\\bfseries\\color{#2}#3}
+      }
+
+      \\title{New Simple CV}
+      \\author{\\LaTeX{} Ninja}
+      \\date{June 2023}
+
+      \\pagestyle{empty}
+      \\begin{document}
+
+      \\thispagestyle{empty}
+
+      %==== Personal Information ====%
+      ${generator.personalInformationSection(values.personal_information)}
+
       %==== Skills ====%
-      \\makerubric{${escapeLatex(heading || 'skills')}}
-      \\begin{tabularx}{\\textwidth}{ l X }
-      ${skills.map((skill) => {
-        const { name = 'Misc', keywords = [] } = skill;
-        return `${escapeLatex(name)}: & ${keywords.map(escapeLatex).join(', ')} \\\\`;
-      })}
-      \\end{tabularx}
-      \\vspace{2mm}
+      ${generator.skillsSection(values.skills, headings.skills)}
+
+      \\end{document}
     `;
-  },
-};
+  }
 
-function template3(values: FormValues) {
-  const { headings } = values;
-
-  return stripIndent`
-    ${generator.resumeHeader()}
-
-    \\begin{document}
-    \\makeheaders[c]
-
-    ${values.sections
-      .map((section) => {
-        switch (section) {
-          case 'personal_information':
-            return generator.personalInformationSection(values.personal_information);
-
-          case 'experience':
-            return generator.experienceSection(values.experience, headings.experience);
-
-          case 'education':
-            return generator.educationSection(values.education, headings.education);
-
-          case 'skills':
-            return generator.skillsSection(values.skills, headings.skills);
-
-          default:
-            return '';
-        }
-      })
-      .join('\n\n')}
-
-    ${WHITESPACE}
-    \\end{document}
-  `;
-}
-
-export default template3;
+  export default template3;
