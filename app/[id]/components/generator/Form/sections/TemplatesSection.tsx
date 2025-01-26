@@ -3,11 +3,13 @@ import { useFormContext, Controller } from 'react-hook-form';
 import styled from 'styled-components';
 import Lightbox from 'react-image-lightbox';
 import { FormSection } from './FormSection';
-import { Button } from '../../../core/Button';
 import { colors } from '../../../../theme';
 import { TEMPLATES } from '../../../../../../lib/templates/constants';
 import { FormValues } from '../../../../../types';
 import 'react-image-lightbox/style.css';
+import { Sidebar } from 'primereact/sidebar';
+import { Button } from 'primereact/button';
+
 
 const Grid = styled.div`
   display: grid;
@@ -58,6 +60,7 @@ const TemplateButton = styled(Button)`
 
 const images = TEMPLATES.map(template => '/img/' + template + '.png');
 export function TemplatesSection() {
+    const [visible, setVisible] = useState(false);
 
     const { control, watch } = useFormContext<FormValues>();
     const selectedTemplate = watch('selectedTemplate');
@@ -77,9 +80,20 @@ export function TemplatesSection() {
         console.log("Template changed to:", selectedTemplate);
     }, [selectedTemplate]);
 
-    return (
-        <FormSection title="Choose a Template">
-            <Grid>
+    return (<>
+        <Button
+            icon="pi pi-bars"
+            onClick={() => setVisible(true)}
+            className="fixed top-50 left-0 z-5"
+        />
+
+        <Sidebar
+            visible={visible}
+            position="left"
+            onHide={() => setVisible(false)}
+            className="w-full md:w-20rem lg:w-24rem"
+        >        <h2 className="text-xl font-bold mb-4">Choose Template</h2>
+            <div className="grid">
                 {images.map((src, i) => {
                     const templateId = i + 1;
                     return (
@@ -105,15 +119,17 @@ export function TemplatesSection() {
                         </Div>
                     );
                 })}
-            </Grid>
+            </div>
+
             {isLightboxOpen && (
                 <Lightbox
                     imageCaption={`Template ${lightboxImageIndex + 1}`}
                     mainSrc={images[lightboxImageIndex]}
                     onCloseRequest={hideLightbox}
-                />
-            )}
-        </FormSection>
+                />)}
+                </Sidebar>
+
+    </>
     );
 }
 
