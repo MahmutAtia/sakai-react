@@ -12,7 +12,6 @@ const workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
 
 const Output = styled.output`
-  grid-area: preview;
   background: ${(props) => props.theme.lightBlack};
   overflow-y: auto;
 `
@@ -64,9 +63,23 @@ export function Preview() {
         setScale(scale - 0.25)
     }
 
+    const [searchText, setSearchText] = useState('');
+
+    const textRenderer = useCallback(
+        (textItem) => highlightPattern(textItem.str, searchText),
+        [searchText]
+    );
+    function onChange(event) {
+        setSearchText(event.target.value);
+    }
+
     return (
         <Output>
             <button onClick={() => window.open(resume.url)}>export as pdf</button>
+            <div>
+                <label htmlFor="search">Search:</label>
+                <input type="search" id="search" value={searchText} onChange={onChange} />
+            </div>
             <PdfContainer>
                 <Toolbar
                     resumeURL={resume.url || '/blank.pdf'}
@@ -81,18 +94,24 @@ export function Preview() {
                 <LoadingBar status={status} />
 
                 <ResumeDocument
+                wrap
                     file={resume.url || '/blank.pdf'}
                     onLoadSuccess={handleDocumentLoadSuccess}
                     loading={<ProgressBar mode="indeterminate" style={{ height: '6px' }} />}
+
                 >
                     <ResumePage
+                        wrap
                         pageNumber={pageNumber}
                         scale={scale}
                         renderAnnotationLayer={false}
                         renderTextLayer={false}
                         loading={<ProgressBar mode="indeterminate" style={{ height: '6px' }} />}
+                        customTextRenderer={textRenderer}
+
                     />
                 </ResumeDocument>
+
             </PdfContainer>
         </Output>
     )
@@ -127,8 +146,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
     zoomOut
 }) => {
     return (
-        <div className="flex items-center justify-between p-4 bg-gray-100 border-b">
-            <div className="flex gap-2">
+        <div className="flex items-center justify-between p-4 bg-gray-100 border-b w-full">
+            <div className="flex gap-5">
                 <Button
                     icon="pi pi-download"
                     onClick={downloadSource}
