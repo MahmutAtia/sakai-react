@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Checkbox } from 'primereact/checkbox';
 import { useRouter } from 'next/navigation';
 import debounce from 'lodash/debounce';
+import { useSession } from 'next-auth/react';
 
 
 const ResumeBuilder = () => {
@@ -28,12 +29,12 @@ const ResumeBuilder = () => {
         }
     });
 
-    const debouncedUpdate = useCallback(
-        debounce((value) => {
-            setFormData(prev => ({ ...prev, description: value }));
-        }, 300),
-        []
-    );
+    const { data: session } = useSession();
+    console.log(session);
+    const userToken = session?.accessToken;
+
+
+
     const toast = useRef(null);
     const router = useRouter();
 
@@ -230,25 +231,47 @@ const ResumeBuilder = () => {
 
     const handleFinalSubmit = async (event) => {
         try {
+            // Ensure a file is selected
+            if (!event.files || event.files.length === 0) {
+                throw new Error('No file selected');
+            }
+
+            // Create FormData and append the file and metadata
             const finalFormData = new FormData();
             finalFormData.append('resume', event.files[0]);
             finalFormData.append('formData', JSON.stringify(formData));
 
-        console.log('finalFormData', finalFormData);
-            const response = await fetch('/api/resume/upload', {
-                method: 'POST',
-                body: finalFormData
-            });
+            // Debugging: Log FormData contents
+            for (let [key, value] of finalFormData.entries()) {
+                console.log(key, value);
+            }
 
-            if (!response.ok) throw new Error('Upload failed');
+            // Send the request
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/resumes/generate_from_job_desc/`,
+                {
+                    method: 'POST',
+                    body: finalFormData, // Use finalFormData, not formData
+                    headers: {
+                        'Authorization': `Bearer ${userToken}` // Add auth if needed
+                    }
+                }
+            );
+
+            // Handle response
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Upload failed');
+            }
 
             const data = await response.json();
-            router.push(`/main/editor/${data.resumeId}`);
+            router.push(`/main/editor/${data.id}`);
         } catch (error) {
+            console.error('Upload Error:', error); // Log the actual error
             toast.current.show({
                 severity: 'error',
                 summary: 'Upload Failed',
-                detail: 'Please try again'
+                detail: error.message || 'Please try again'
             });
         }
     };

@@ -54,12 +54,6 @@ const PositionTemplatesPage = () => {
     }
 
     useEffect(() => {
-        // for now auth already in middleware leve
-
-        //     if (status === "unauthenticated") {
-        //         router.push('/login');
-        //         return;
-        //     }
 
         const fetchPositions = async () => {
             try {

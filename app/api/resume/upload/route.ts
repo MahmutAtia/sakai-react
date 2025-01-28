@@ -3,29 +3,29 @@ import { NextResponse } from 'next/server';
 import mammoth from 'mammoth';
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "../../auth/[...nextauth]/options"
+import { TextItem } from 'pdfjs-dist/types/src/display/api';
+import pdfjsDist from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/+esm'
 
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc =  'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.js';
 
-
-
-// Configure for larger file uploads
 export const config = {
     api: {
         bodyParser: false,
-        responseLimit: '5mb',
     },
 };
 
 export async function POST(request: Request) {
-
-
-
     try {
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
 
-        // Get form data from request
         const formData = await request.formData();
-
-        // pop the text from the file  from the form data
-
         const file = formData.get('resume') as File;
 
         if (!file) {
@@ -35,51 +35,33 @@ export async function POST(request: Request) {
             );
         }
 
-        // Read file as buffer
-        const buffer = Buffer.from(await file.arrayBuffer());
         let text = '';
+        const buffer = Buffer.from(await file.arrayBuffer());
         const fileType = file.type;
 
-        // Process different file types
+        // Handle PDF files
         if (fileType === 'application/pdf') {
             try {
-                const formData = await request.formData();
-                const file = formData.get('file') as File;
+                const loadingTask = pdfjs.getDocument(buffer);
+                const pdfDoc = await loadingTask.promise;
 
-                if (!file) {
-                    return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+                for (let i = 1; i <= pdfDoc.numPages; i++) {
+                    const page = await pdfDoc.getPage(i);
+                    const textContent = await page.getTextContent();
+                    text += textContent.items
+                        .map((item: TextItem) => item.str)
+                        .join(' ') + '\n';
                 }
-
-                const buffer = await file.arrayBuffer();
-                const uint8Array = new Uint8Array(buffer);
-
-                try {
-
-                    const pdfDoc = await loadingTask.promise;
-                    let text = '';
-
-                    for (let i = 1; i <= pdfDoc.numPages; i++) {
-                        const page = await pdfDoc.getPage(i);
-                        const content = await page.getTextContent();
-                        text += content.items.map((item: any) => item.str).join(' ');
-                    }
-
-                    return NextResponse.json({
-                        success: true,
-                        text: text
-                    });
-
-                } catch (pdfError) {
-                    console.error("PDF Parsing Error:", pdfError);
-                    return NextResponse.json({ error: 'PDF parsing failed' }, { status: 500 });
-                }
-            } catch (error) {
-                console.error("Upload Error:", error);
-                return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+            } catch (pdfError) {
+                console.error("PDF Parsing Error:", pdfError);
+                return NextResponse.json(
+                    { error: 'Failed to parse PDF document' },
+                    { status: 400 }
+                );
             }
-
-
-        } else if (
+        }
+        // Handle DOCX/DOC files
+        else if (
             fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
             fileType === 'application/msword'
         ) {
@@ -93,40 +75,42 @@ export async function POST(request: Request) {
                     { status: 400 }
                 );
             }
-        } else if (fileType === 'text/plain') {
+        }
+        // Handle plain text files
+        else if (fileType === 'text/plain') {
             text = buffer.toString('utf-8');
-        } else {
+        }
+        // Unsupported file types
+        else {
             return NextResponse.json(
                 { error: 'Unsupported file type' },
                 { status: 400 }
             );
         }
 
-        //
-        const data = formData.get('formData') as FormDataEntryValue | null;
-        if (!data || typeof data !== 'string') {
+        // Process form data
+        const formDataEntry = formData.get('formData');
+        if (!formDataEntry || typeof formDataEntry !== 'string') {
             return NextResponse.json(
                 { error: 'Invalid form data' },
                 { status: 400 }
             );
         }
-        const parsedData = JSON.parse(data);
+
+        const parsedData = JSON.parse(formDataEntry);
         const input_data = {
             input_text: text,
             job_description: parsedData.description,
             language: parsedData.targetLanguage,
-            docs_instructions: "".concat(...Array.from(Object.entries(parsedData.documentPreferences)).map(([key, value]) => value ? `write  a  ${key} and tailor it to the job description` : ''),
-
-            )
+            docs_instructions: Object.entries(parsedData.documentPreferences)
+                .filter(([_, value]) => value)
+                .map(([key]) => `Write a ${key} tailored to the job description`)
+                .join(' ')
         };
-        const response = await processResumeText(input_data as any)
 
+        // Process resume text with backend
+        const response = await processResumeText(input_data, session.accessToken);
 
-
-
-
-
-        // For now, we'll just return the ID
         return NextResponse.json({
             resumeId: response.id,
             success: true,
@@ -140,30 +124,18 @@ export async function POST(request: Request) {
             { status: 500 }
         );
     }
-
 }
 
-
-async function processResumeText(input_data: any) {
-    const session = await getServerSession(authOptions)
-
-    const token = session?.accessToken;
-
+async function processResumeText(inputData: any, token: string) {
     try {
-        const response = await fetch(`${process.env.BACKEND_URL}/api/resumes/generate_from_job_desc/`
-            , {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {})
-
-                },
-                body: JSON.stringify(
-                    {
-                        input: input_data
-                    }
-                ),
-            });
+        const response = await fetch(`${process.env.BACKEND_URL}/api/resumes/generate_from_job_desc/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ input: inputData }),
+        });
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -177,5 +149,3 @@ async function processResumeText(input_data: any) {
         throw error;
     }
 }
-
-
