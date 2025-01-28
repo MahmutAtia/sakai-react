@@ -221,7 +221,7 @@ const EditableResumeTemplate = ({ resumeId }) => {
                         icon="pi pi-download"
                         label="Export"
                         className="p-button-outlined"
-                        onClick={() => router.push(`/${resumeId}`)}
+                        onClick={() => router.push(`/export/${resumeId}`)}
                     />
                     <Button
                         icon="pi pi-save"

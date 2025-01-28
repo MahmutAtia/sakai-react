@@ -1,5 +1,11 @@
 "use client";
+import React, { use } from 'react';
 import { Document, Page, Text, View, StyleSheet, PDFViewer, Link } from '@react-pdf/renderer';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 // Define colors
 const colors = {
@@ -511,7 +517,7 @@ const Resume = ({ data }) => (
                     .map((section) => {
                         const SectionComponent = sectionComponents[section];
                         if (data[section] && SectionComponent &&
-                            (!Array.isArray(data[section]) || data[section].length > 0)){
+                            (!Array.isArray(data[section]) || data[section].length > 0)) {
                             return <SectionComponent key={section} {...{ [section]: data[section] }} />;
                         }
                         return null;
@@ -522,226 +528,75 @@ const Resume = ({ data }) => (
 );
 
 // App Component
-const App = () => {
+const App = ({ params }) => {
+    const [loading, setLoading] = useState(true);
+    const [resumeData, setResumeData] = useState(null);
+    const router = useRouter();
 
 
+    useEffect(() => {
+        const fetchResumeData = async () => {
+            // if (status === 'loading') return;
+
+            setLoading(true);
+
+            // If data is in local storage, get the resume data with the id from local storage
+            const data = localStorage.getItem('data');
+
+            if (data) {
+                // Data is an array of objects which contains the resume
+                const resume = JSON.parse(data).find((item) => item.id === Number(params.id));
+                if (!resume) {
+                    router.push('/main/dashboard');
+                    return;
+                }
+                setResumeData(resume.resume);
+                setLoading(false);
+                return;
+            }
+
+            // get the resume data from the backend if not exists in local storage
+            try {
+                const response = await axios.get(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/resumes/${params.id}`,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(session?.accessToken && {
+                                'Authorization': `Bearer ${session.accessToken}`
+                            })
+                        }
+                    }
+                );
+                const resume = response.data.resume;
+                setResumeData(resume);
+                console.log(resume);
+            } catch (error) {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: error.message,
+                    life: 3000
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchResumeData();
+    }, [params.id]);
 
 
-    return (
-        <div style={{ width: '100%', height: '1200px' }}>
-            <PDFViewer wrap={false} showToolbar={true} width="100%" height="100%">
-                <Resume data={data} />
-            </PDFViewer>
-        </div>
-    );
+    return loading ? (
+        <> <ProgressSpinner /> </>
+    ) :
+        (
+            <div style={{ width: '100%', height: '1200px' }}>
+                <PDFViewer wrap={false} showToolbar={true} width="100%" height="100%">
+                    <Resume data={resumeData} />
+                </PDFViewer>
+            </div>
+        );
 }
 
 export default App;
-const data = {
-    "personal_information": {
-        "name": "John Doe",
-        "email": "john.doe@example.com",
-        "phone": "+1234567890",
-        "location": {
-            "address": "123 Main St",
-            "city": "Anytown",
-            "state": "CA",
-            "postal_code": "12345"
-        },
-        "profiles": {
-            "linkedin": "https://linkedin.com/in/johndoe",
-            "github": "https://github.com/johndoe",
-            "website": "https://johndoe.com",
-            "portfolio": "https://portfolio.johndoe.com"
-        }
-    },
-    "summary": "Experienced software engineer with a passion for building scalable web applications.",
-    "objective": "To leverage my skills in software development to contribute to innovative projects.",
-    "experience": [
-        {
-            "company": "Tech Corp",
-            "title": "Senior Software Engineer",
-            "location": "San Francisco, CA",
-            "start_date": "2018-06",
-            "end_date": "2021-12",
-            "description": "Developed and maintained web applications using React and Node.js.",
-            "technologies": ["React", "Node.js", "AWS"]
-        }
-    ],
-    "education": [
-        {
-            "institution": "University of California, Berkeley",
-            "degree": "Bachelor of Science",
-            "major": "Computer Science",
-            "minor": "Mathematics",
-            "gpa": "3.8",
-            "graduation_date": "2018-05",
-            "relevant_courses": ["Data Structures", "Algorithms", "Machine Learning"]
-        }
-    ],
-    "skills": [
-        {
-            "name": "Programming Languages",
-            "proficiency": "Advanced",
-            "keywords": ["JavaScript", "Python", "Java"]
-        }
-    ],
-    "projects": [
-        {
-            "name": "E-commerce Platform",
-            "description": "Built a full-stack e-commerce platform using React and Node.js.",
-            "link": "https://github.com/johndoe/ecommerce"
-        }
-    ],
-    "awards_and_recognition": [
-        {
-            "title": "Best Software Engineer",
-            "issuing_organization": "Tech Awards 2021",
-            "date_received": "2021-12-15",
-            "description": "Awarded for outstanding contributions to software development."
-        }
-    ],
-    "volunteer_and_social_activities": [
-        {
-            "organization": "Code for Good",
-            "position": "Volunteer Developer",
-            "start_date": "2019-01",
-            "end_date": "2020-12",
-            "description": "Developed software solutions for non-profit organizations."
-        }
-    ],
-    "certifications": [
-        {
-            "name": "AWS Certified Developer",
-            "issuing_authority": "Amazon Web Services",
-            "date_obtained": "2020-06-01",
-            "expiry_date": "2023-06-01",
-            "description": "Certified in developing and maintaining applications on AWS."
-        }
-    ],
-    "languages": [
-        {
-            "language": "English",
-            "proficiency": "Native"
-        },
-        {
-            "language": "Spanish",
-            "proficiency": "Intermediate"
-        }
-    ],
-    "interests": [
-        {
-            "name": "Technology",
-            "keywords": ["AI", "Blockchain", "Web Development"]
-        }
-    ],
-    "references": [
-        {
-            "name": "Jane Smith",
-            "position": "Senior Manager",
-            "company_or_institution": "Tech Corp",
-            "email": "jane.smith@example.com",
-            "phone": "+0987654321",
-            "relationship": "Former Manager",
-            "years_known": "3",
-            "description": "John is a highly skilled and dedicated software engineer."
-        }
-    ],
-    "publications": [
-        {
-            "title": "Building Scalable Web Applications",
-            "authors": ["John Doe"],
-            "publication_date": "2021-05-01",
-            "publisher": "Tech Journal",
-            "link": "https://techjournal.com/building-scalable-web-apps",
-            "description": "A comprehensive guide to building scalable web applications."
-        }
-    ],
-    "courses": [
-        {
-            "title": "Advanced React",
-            "institution": "Udemy",
-            "completion_date": "2020-03-01",
-            "link": "https://udemy.com/advanced-react",
-            "description": "Learned advanced concepts in React development."
-        }
-    ],
-    "conferences": [
-        {
-            "name": "React Summit 2021",
-            "date": "2021-10-15",
-            "location": "San Francisco, CA",
-            "link": "https://reactsummit.com",
-            "description": "Attended workshops and sessions on React development."
-        }
-    ],
-    "speaking_engagements": [
-        {
-            "title": "Introduction to React Hooks",
-            "event": "React Meetup",
-            "date": "2021-08-10",
-            "location": "Online",
-            "audience_size": "100",
-            "video_link": "https://youtube.com/react-hooks",
-            "slides_link": "https://slides.com/react-hooks",
-            "description": "Delivered a talk on React Hooks at a local meetup."
-        }
-    ],
-    "patents": [
-        {
-            "title": "System for Efficient Data Processing",
-            "patent_number": "US1234567",
-            "filing_date": "2020-01-15",
-            "issue_date": "2021-05-01",
-            "status": "Granted",
-            "inventors": ["John Doe", "Jane Smith"],
-            "description": "A system for processing large datasets efficiently."
-        }
-    ],
-    "professional_memberships": [
-        {
-            "organization": "ACM",
-            "role": "Member",
-            "start_date": "2019-01-01",
-            "end_date": "Present",
-            "benefits": ["Networking", "Access to Journals"],
-            "description": "Active member of the Association for Computing Machinery."
-        }
-    ],
-    "military_service": [
-        {
-            "branch": "US Army",
-            "rank": "Sergeant",
-            "start_date": "2010-06-01",
-            "end_date": "2014-06-01",
-            "location": "Fort Bragg, NC",
-            "duties": ["Leadership", "Training"],
-            "awards": ["Army Commendation Medal"]
-        }
-    ],
-    "teaching_experience": [
-        {
-            "institution": "Local Community College",
-            "position": "Adjunct Professor",
-            "subject": "Computer Science",
-            "start_date": "2019-09-01",
-            "end_date": "2021-05-01",
-            "description": "Taught introductory programming courses.",
-            "student_level": "Undergraduate",
-            "class_size": "30"
-        }
-    ],
-    "research_experience": [
-        {
-            "institution": "University of California, Berkeley",
-            "project": "AI for Social Good",
-            "role": "Research Assistant",
-            "start_date": "2017-06-01",
-            "end_date": "2018-05-01",
-            "description": "Researched applications of AI in social impact projects.",
-            "funding_source": "NSF Grant",
-            "publications": ["AI for Social Good: A Case Study"],
-            "collaborators": ["Dr. Jane Smith", "Dr. John Doe"]
-        }
-    ]
-}
