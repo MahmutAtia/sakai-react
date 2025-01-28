@@ -28,6 +28,10 @@ const ResumeEditorPage = ({ params }) => {
             if (data) {
                 // Data is an array of objects which contains the resume
                 const resume = JSON.parse(data).find((item) => item.id === Number(params.id));
+                if (!resume) {
+                    router.push('/main/dashboard');
+                    return;
+                }
                 setResumeData(resume.resume);
                 setLoading(false);
                 return;

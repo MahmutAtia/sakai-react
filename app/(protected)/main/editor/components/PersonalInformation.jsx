@@ -4,7 +4,6 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { useResume } from "../ResumeContext";
-import ArrayField from "./ArrayField";
 import { Toast } from "primereact/toast";
 import AIAssistant from "./AIAssistant";
 
@@ -123,11 +122,13 @@ const PersonalInformation = ({ sectionKey }) => {
 
             <div className="flex flex-column gap-2 p-4">
                 <p className="m-0">{personalInfo.email}</p>
-                {personalInfo.phone.map((phone, index) => (
-                    <p key={index} className="m-0">
-                        {phone}
+
+                {personalInfo.phone && (
+                    <p className="m-0">
+                        {personalInfo.phone}
                     </p>
-                ))}
+                )}
+
                 {personalInfo.location?.address && (
                     <p className="m-0">{personalInfo.location.address}</p>
                 )}
@@ -180,13 +181,14 @@ const PersonalInformation = ({ sectionKey }) => {
                         </div>
 
                         <div className="field">
-                            <label className="block mb-2">Phone Numbers</label>
-                            <ArrayField
-                                values={personalInfo.phone}
-                                onChange={handlePhoneChange}
-                                onAdd={addPhone}
-                                placeholder="Add phone number"
+                            <label className="block mb-2">Phone Number</label>
+                            <InputText
+                                value={personalInfo.phone || ""}
+                                onChange={(e) => handlePhoneChange(0, e)}
+                                className="w-full"
                             />
+
+
                         </div>
 
                         <div className="field">
