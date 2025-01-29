@@ -13,10 +13,12 @@ import { Checkbox } from 'primereact/checkbox';
 import { useRouter } from 'next/navigation';
 import debounce from 'lodash/debounce';
 import { useSession } from 'next-auth/react';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 
 const ResumeBuilder = () => {
     const [activeIndex, setActiveIndex] = useState(0);
+    const [loading, setLoading] = useState(false);
     // Update formData structure
     const [formData, setFormData] = useState({
         purpose: '',
@@ -86,6 +88,7 @@ const ResumeBuilder = () => {
                                         value={type}
                                         onChange={(e) => setFormData({ ...formData, purpose: e.value })}
                                         checked={formData.purpose === type}
+                                        required
                                     />
                                     <label htmlFor={type} className="ml-2 font-medium capitalize">
                                         {type} Application
@@ -117,10 +120,15 @@ const ResumeBuilder = () => {
                                 </label>
                                 <div className="flex flex-column gap-2">
                                     <InputTextarea
-                                        value={formData.description}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                                        key="description-textarea"
+                                        value={formData.description || ''}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setFormData(prev => ({ ...prev, description: value }));
+                                        }}
                                         rows={5}
                                         className="w-full"
+                                        placeholder={`Enter your ${formData.purpose === 'job' ? 'job description' : 'scholarship details'} here...`}
                                     />
                                     <Button
                                         icon="pi pi-paste"
@@ -246,6 +254,8 @@ const ResumeBuilder = () => {
                 console.log(key, value);
             }
 
+            setLoading(true);
+
             // Send the request
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/resumes/generate_from_job_desc/`,
@@ -260,6 +270,7 @@ const ResumeBuilder = () => {
 
             // Handle response
             if (!response.ok) {
+                setLoading(false);
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Upload failed');
             }
@@ -267,6 +278,7 @@ const ResumeBuilder = () => {
             const data = await response.json();
             router.push(`/main/editor/${data.id}`);
         } catch (error) {
+            setLoading(false);
             console.error('Upload Error:', error); // Log the actual error
             toast.current.show({
                 severity: 'error',
@@ -276,44 +288,49 @@ const ResumeBuilder = () => {
         }
     };
 
-    return (
-        <div className="surface-ground px-4 py-8 md:px-6 lg:px-8 min-h-screen">
-            <Toast ref={toast} />
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-content-center"
-            >
-                <Card className="w-full md:w-8 lg:w-6">
-                    <Steps
-                        model={steps}
-                        activeIndex={activeIndex}
-                        onSelect={(e) => setActiveIndex(e.index)}
-                        className="mb-6"
-                    />
-                    <AnimatePresence mode="wait">
-                        {renderStep()}
-                    </AnimatePresence>
-                    <div className="flex justify-content-between mt-4">
-                        <Button
-                            label="Back"
-                            icon="pi pi-angle-left"
-                            onClick={() => setActiveIndex(activeIndex - 1)}
-                            disabled={activeIndex === 0}
-                            className="p-button-secondary"
-                        />
-                        <Button
-                            label={activeIndex === steps.length - 1 ? 'Submit' : 'Next'}
-                            icon="pi pi-angle-right"
-                            iconPos="right"
-                            onClick={() => setActiveIndex(activeIndex + 1)}
-                            disabled={activeIndex === steps.length - 1}
-                        />
-                    </div>
-                </Card>
-            </motion.div>
+    return loading ? (
+        <div className="flex justify-content-center align-items-center min-h-screen">
+            <ProgressSpinner />
         </div>
-    );
+    ) :
+        (
+            <div className="surface-ground px-4 py-8 md:px-6 lg:px-8 min-h-screen">
+                <Toast ref={toast} />
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-content-center"
+                >
+                    <Card className="w-full md:w-8 lg:w-6">
+                        <Steps
+                            model={steps}
+                            activeIndex={activeIndex}
+                            onSelect={(e) => setActiveIndex(e.index)}
+                            className="mb-6"
+                        />
+                        <AnimatePresence mode="wait">
+                            {renderStep()}
+                        </AnimatePresence>
+                        <div className="flex justify-content-between mt-4">
+                            <Button
+                                label="Back"
+                                icon="pi pi-angle-left"
+                                onClick={() => setActiveIndex(activeIndex - 1)}
+                                disabled={activeIndex === 0}
+                                className="p-button-secondary"
+                            />
+                            <Button
+                                label={activeIndex === steps.length - 1 ? 'Submit' : 'Next'}
+                                icon="pi pi-angle-right"
+                                iconPos="right"
+                                onClick={() => setActiveIndex(activeIndex + 1)}
+                                disabled={activeIndex === steps.length - 1}
+                            />
+                        </div>
+                    </Card>
+                </motion.div>
+            </div>
+        );
 };
 
 export default ResumeBuilder;
