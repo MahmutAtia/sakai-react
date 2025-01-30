@@ -1,8 +1,10 @@
 'use client';
 import React from 'react';
 import { Button } from 'primereact/button';
+import { useRouter } from 'next/navigation'
 
 const HeroSection = () => {
+    const router = useRouter();
     return (
         <div
             id="hero"
@@ -17,7 +19,8 @@ const HeroSection = () => {
                     <span className="font-light block">Eu sem integer</span>eget magna fermentum
                 </h1>
                 <p className="font-normal text-2xl line-height-3 md:mt-3 text-gray-700">Sed blandit libero volutpat sed cras. Fames ac turpis egestas integer. Placerat in egestas erat... </p>
-                <Button type="button" label="Get Started" rounded className="text-xl border-none mt-3 bg-blue-500 font-normal line-height-3 px-3 text-white"></Button>
+                <Button onClick={() =>  router.push('/resume')}
+                 type="button" label="Get Started" rounded className="text-xl border-none mt-3 bg-blue-500 font-normal line-height-3 px-3 text-white"></Button>
             </div>
             <div className="flex justify-content-center md:justify-content-end">
                 <img src="/demo/images/landing/screen-1.png" alt="Hero Image" className="w-9 md:w-auto" />

@@ -33,7 +33,8 @@ export const config = {
       '/(protected)/:path*',
       '/editor/:path*',
       '/test/:path*',
-        '/main/:path*'
+        '/main/:path*',
+        '/resume'
 
     ]
   }

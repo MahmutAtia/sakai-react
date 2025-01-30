@@ -288,6 +288,13 @@ const ResumeBuilder = () => {
         }
     };
 
+
+
+
+    // if (session?.accessToken === undefined ){
+    //     router.push('/login');
+    // }
+
     return loading ? (
         <div className="flex justify-content-center align-items-center min-h-screen">
             <ProgressSpinner />
