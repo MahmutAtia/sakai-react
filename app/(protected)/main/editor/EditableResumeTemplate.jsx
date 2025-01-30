@@ -16,12 +16,14 @@ import 'primeflex/primeflex.css';
 import styles from './EditableResumeTemplate.module.css';
 import { Toast } from 'primereact/toast';
 import { useRouter } from 'next/navigation';
+import { Sidebar } from 'primereact/sidebar';
+
 
 const EditableResumeTemplate = ({ resumeId }) => {
     const { data } = useResume();
     const [loading, setLoading] = useState(false);
     const [hiddenSections, setHiddenSections] = useState([]);
-    const [sidebarVisible, setSidebarVisible] = useState(false);
+    const [sidebarVisible, setSidebarVisible] = useState(true);
     const router = useRouter();
     const NON_ARRAY_SECTIONS = ['personal_information', 'summary', 'objective'];
     const toast = useRef(null);
@@ -214,7 +216,32 @@ const EditableResumeTemplate = ({ resumeId }) => {
         <div>
             <Toast ref={toast} />
             {/* Header */}
-            <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg sticky top-0 z-5">
+
+            <div className="surface-ground h-full flex">
+
+                <div className="flex-1 overflow-hidden">
+
+                    {/* Sidebar Toggle Button */}
+                    <button
+                        className={`${styles.sidebarToggleButton} `}
+                        onClick={() => setSidebarVisible(!sidebarVisible)}
+                    >
+                        <i className="pi pi-bars"></i>
+                    </button>
+
+                    {/* Sidebar */}
+
+                    <Sidebar
+                        visible={sidebarVisible}
+                        onHide={() => setSidebarVisible(false)}
+                        position="left"
+                        className="w-22rem"
+                        showCloseIcon={false}
+                        modal={false} // Disable modal backdrop
+                        role='menu'
+                    >
+                        {/* header */}
+                        <div className="flex justify-content-between align-items-center p-4 surface-card shadow-1 border-round-lg sticky top-0 z-5">
                 <h1 className="text-2xl font-semibold m-0">Resume Editor</h1>
                 <div className="flex gap-2">
                     <Button
@@ -231,20 +258,8 @@ const EditableResumeTemplate = ({ resumeId }) => {
                     />
                 </div>
             </div>
-            <div className="surface-ground h-full flex">
 
-                <div className="flex-1 overflow-hidden">
 
-                    {/* Sidebar Toggle Button */}
-                    <button
-                        className={`${styles.sidebarToggleButton} `}
-                        onClick={() => setSidebarVisible(!sidebarVisible)}
-                    >
-                        <i className="pi pi-bars"></i>
-                    </button>
-
-                    {/* Sidebar */}
-                    <div className={`${styles.sidebar} ${sidebarVisible ? styles.sidebarVisible : ''}`}>
                         <div className="surface-card p-4 border-bottom-1 surface-border backdrop-blur-sm bg-white-alpha-90">
                             <p className="text-600 text-sm mt-2 mb-0">Drag sections to reorder</p>
                         </div>
@@ -283,14 +298,14 @@ const EditableResumeTemplate = ({ resumeId }) => {
                                                                         {...provided.draggableProps}
                                                                         {...provided.dragHandleProps}
                                                                         className={`
-                                                                    surface-card border-round-lg
-                                                                    p-3 flex align-items-center justify-content-between
-                                                                    cursor-pointer transition-all transition-duration-200
-                                                                    ${snapshot.isDragging
+                                                        surface-card border-round-lg
+                                                        p-3 flex align-items-center justify-content-between
+                                                        cursor-pointer transition-all transition-duration-200
+                                                        ${snapshot.isDragging
                                                                                 ? "shadow-4"
                                                                                 : "shadow-1 hover:shadow-2"
                                                                             }
-                                                                `}
+                                                    `}
                                                                     >
                                                                         <div className="flex align-items-center gap-2">
                                                                             <span className="font-medium text-700">
@@ -321,7 +336,7 @@ const EditableResumeTemplate = ({ resumeId }) => {
                                 </AccordionTab>
                             </Accordion>
                         </div>
-                    </div>
+                    </Sidebar>
 
                     {/* Overlay for Sidebar on Small Screens */}
                     {sidebarVisible && (

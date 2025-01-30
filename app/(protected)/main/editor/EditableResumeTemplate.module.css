@@ -101,13 +101,7 @@
 
 
 
-.sidebarContent {
-    max-height: calc(100vh - 12rem); /* Account for header + top bar */
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) var(--surface-ground);
-    padding: 1rem;
-}
+
 
 .sidebarContent::-webkit-scrollbar {
     width: 6px;
@@ -239,11 +233,11 @@
 
 
 .sidebarContent {
-    max-height: calc(100vh - 12rem); /* Account for header + top bar */
+    max-height: calc(102vh - 12rem); /* Account for header + top bar */
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) var(--surface-ground);
-    padding: 1rem;
+    padding: 0.5rem;
 }
 
 .sidebarContent::-webkit-scrollbar {
