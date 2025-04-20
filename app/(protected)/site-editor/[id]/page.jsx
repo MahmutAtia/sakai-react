@@ -13,10 +13,10 @@ import { Divider } from 'primereact/divider';
 import AIAssistant from '../../main/editor/components/AIAssistant';
 
 const initialYamlState = {
-    global: { name: "global", js: "", css: "", html: "", feedback: "Global styles and settings." },
-    code_bloks: []
+    website: { name: "" },
+    global: { name:"global", fonts: "", global_cdn: { css: [], js: [] }, base_css: "", themes: { default: "", dark: "" }, global_js: "", other_global_css: "", feedback: "Modify global styles, themes, JavaScript, and theme switch." },
+    code_blocks: []
 };
-
 // Debounce helper function
 function debounce(func, wait) {
     let timeout;
@@ -57,10 +57,10 @@ const PersonalSiteEditorPage = ({ params }) => {
     const getLocalStorageKey = useCallback(() => `personalSiteEditorBackup_${resumeId}`, [resumeId]);
     // --- Helper to Initialize History --- (Run after setting yamlData)
     const initializeHistory = useCallback((data) => {
-        if (!data || !data.code_bloks) return;
+        if (!data || !data.code_blocks) return;
         const initialHistory = {};
         const initialIndices = {};
-        data.code_bloks.forEach(block => {
+        data.code_blocks.forEach(block => {
             const initialState = { html: block.html, css: block.css, js: block.js };
             initialHistory[block.name] = [initialState];
             initialIndices[block.name] = 0;
@@ -140,7 +140,7 @@ const PersonalSiteEditorPage = ({ params }) => {
         //         }
         //     });
         // } else {
-            fetchAndProcess(); // Fetch if no backup
+        fetchAndProcess(); // Fetch if no backup
         // }
 
     }, [resumeId, getLocalStorageKey, initializeHistory, isRestoring]); // Dependencies
@@ -171,7 +171,7 @@ const PersonalSiteEditorPage = ({ params }) => {
             // Prepare data payload (send only necessary parts)
             const payload = {
                 global: yamlData.global,
-                code_bloks: yamlData.code_bloks
+                code_blocks: yamlData.code_blocks
             };
             await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/website-yaml/update/${resumeId}/`, payload); // Use PUT for overwrite
 
@@ -241,18 +241,46 @@ const PersonalSiteEditorPage = ({ params }) => {
 
         try {
             const validArtifacts = artifacts.filter(art => art.key.trim() !== '');
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/website-yaml/edit-block/`, {
+            const isGlobalBlock = currentBlock.name === 'global'; // Check if it's the global block
+            const backendPayload = {
                 resumeId: resumeId,
                 blockName: currentBlock.name,
-                currentHtml: currentBlock.html,
-                currentCss: currentBlock.css,
-                currentJs: currentBlock.js,
                 prompt: aiPrompt,
                 artifacts: validArtifacts,
-            });
+            };
 
-            // --- Correctly assign response data ---
-            responseData = response.data;
+            // Conditionally add currentHtml, currentCss, currentJs based on the block type
+            if (!isGlobalBlock) {
+                backendPayload.currentHtml = currentBlock.html;
+                backendPayload.currentCss = currentBlock.css;
+                backendPayload.currentJs = currentBlock.js;
+            } else {
+                // For the global block, send relevant properties directly
+                backendPayload.currentFonts = currentBlock.fonts || ''; // Ensure it's a string
+                backendPayload.currentBaseCss = currentBlock.base_css || ''; // Ensure it's a string
+                backendPayload.currentGlobalJs = currentBlock.global_js || ''; // Ensure it's a string
+                backendPayload.currentOtherGlobalCss = currentBlock.other_global_css || ''; // Ensure it's a string
+                backendPayload.currentThemes = currentBlock.themes || {}; // Ensure it's an object
+                backendPayload.currentGlobalCdn = currentBlock.global_cdn || {}; // Ensure it's an object
+                // You might need to adjust these based on what your backend expects
+            }
+
+            // --- Make the API call ---
+
+            if (!isGlobalBlock) {
+                console.log("Sending AI edit request for block:", backendPayload);
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/website-yaml/edit-block/`, backendPayload);
+                console.log("AI edit response:", response.data);
+                responseData = response.data;
+            } else {
+                console.log("Sending AI edit request for global block:", backendPayload);
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/website-yaml/edit-global/`, backendPayload);
+                console.log("AI edit response for global block:", response.data);
+                responseData = response.data;
+            }
+
+
+
 
             // --- Validate response data (basic check) ---
             if (!responseData || typeof responseData !== 'object') {
@@ -310,7 +338,7 @@ const PersonalSiteEditorPage = ({ params }) => {
             // This needs to run to reflect the changes visually
             setYamlData(prevData => {
                 console.log(`[${blockName}] Updating yamlData with newState and newFeedback.`);
-                const updatedBlocks = prevData.code_bloks.map(block => {
+                const updatedBlocks = prevData.code_blocks.map(block => {
                     if (block.name === blockName) {
                         return {
                             ...block,
@@ -330,7 +358,7 @@ const PersonalSiteEditorPage = ({ params }) => {
                 return {
                     ...prevData,
                     global: updatedGlobal,
-                    code_bloks: updatedBlocks
+                    code_blocks: updatedBlocks
                 };
             });
 
@@ -371,7 +399,7 @@ const PersonalSiteEditorPage = ({ params }) => {
 
             // Update yamlData to the previous state
             setYamlData(prevData => {
-                const updatedBlocks = prevData.code_bloks.map(block => {
+                const updatedBlocks = prevData.code_blocks.map(block => {
                     if (block.name === blockName) {
                         // Restore html, css, js. Keep current feedback or restore it too if it's in history state
                         return { ...block, ...previousState };
@@ -381,7 +409,7 @@ const PersonalSiteEditorPage = ({ params }) => {
                 const updatedGlobal = prevData.global.name === blockName ?
                     { ...prevData.global, ...previousState } : prevData.global;
 
-                return { ...prevData, global: updatedGlobal, code_bloks: updatedBlocks };
+                return { ...prevData, global: updatedGlobal, code_blocks: updatedBlocks };
             });
 
             // Update the history index
@@ -415,7 +443,7 @@ const PersonalSiteEditorPage = ({ params }) => {
 
             // Update yamlData to the next state
             setYamlData(prevData => {
-                const updatedBlocks = prevData.code_bloks.map(block => {
+                const updatedBlocks = prevData.code_blocks.map(block => {
                     if (block.name === blockName) {
                         // Restore html, css, js from the next state
                         return { ...block, ...nextState };
@@ -425,7 +453,7 @@ const PersonalSiteEditorPage = ({ params }) => {
                 const updatedGlobal = prevData.global.name === blockName ?
                     { ...prevData.global, ...nextState } : prevData.global;
 
-                return { ...prevData, global: updatedGlobal, code_bloks: updatedBlocks };
+                return { ...prevData, global: updatedGlobal, code_blocks: updatedBlocks };
             });
 
             // Update the history index
@@ -503,7 +531,7 @@ const PersonalSiteEditorPage = ({ params }) => {
             )}
 
 
-            {yamlData.code_bloks.map((block, index) => (
+            {yamlData.code_blocks.map((block, index) => (
                 <div
                     key={block.name || index}
                     className="website-block-container relative"
@@ -516,27 +544,43 @@ const PersonalSiteEditorPage = ({ params }) => {
                         style={{ width: '100%', border: 'none', minHeight: 'inherit' }}
                         sandbox="allow-scripts allow-same-origin"
                         srcDoc={`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                /* Include a CSS reset or normalize here */
-                body, h1, h2, h3, p, ul, li { margin: 0; padding: 0; } /* Example reset */
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Include a CSS reset or normalize here */
+        body, h1, h2, h3, p, ul, li { margin: 0; padding: 0; } /* Example reset */
 
-                ${yamlData.global?.css || ''}
-                ${block.css || ''}
-            </style>
-            ${yamlData.global?.html ? `<div style="display:none !important;" dangerouslySetInnerHTML={{ __html: '${yamlData.global.html}' }}></div>` : ''}
-        </head>
-        <body style="margin: 0;">
-            ${block.html || ''}
-            <script>
-                ${yamlData.global?.js || ''}
-                ${block.js || ''}
-            </script>
-        </body>
-        </html>
-    `}
+        ${yamlData.global?.base_css || ''}
+        ${yamlData.global?.other_global_css || ''}
+        ${yamlData.global?.themes?.default || ''}
+        ${yamlData.global?.css || ''} /* Consider if this is still needed */
+        ${block.css || ''}
+
+        {% if yamlData.global?.global_cdn?.css %}
+            {% for css_url in yamlData.global.global_cdn.css %}
+                <link rel="stylesheet" href="{{ css_url }}">
+            {% endfor %}
+        {% endif %}
+    </style>
+    ${yamlData.global?.fonts || ''}
+</head>
+<body style="margin: 0;">
+    ${block.html || ''}
+    <script>
+        ${yamlData.global?.global_js || ''}
+        ${block.js || ''}
+        {% if yamlData.global?.global_cdn?.js %}
+            {% for js_url in yamlData.global.global_cdn.js %}
+                const script = document.createElement('script');
+                script.src = '{{ js_url }}';
+                document.body.appendChild(script);
+            {% endfor %}
+        {% endif %}
+    </script>
+</body>
+</html>
+`}
                         onLoad={(e) => {
                             try {
                                 const iframe = e.target;
